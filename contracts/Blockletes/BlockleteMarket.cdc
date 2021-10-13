@@ -1,6 +1,6 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import FUSD from 0x3c5959b568896393
-import Blockletes_NFT from 0xBLOCKLETE_ADDRESS
+import Blockletes_NFT_V2 from 0x9969d64233d69723
 /*
 
     BlockleteMarket.cdc
@@ -34,7 +34,7 @@ import Blockletes_NFT from 0xBLOCKLETE_ADDRESS
     deposited to.
 */
 
-pub contract BlockleteMarket_NFT {
+pub contract BlockleteMarket_NFT_V2 {
 
     // -----------------------------------------------------------------------
     // Blocklete Market contract Event definitions
@@ -62,14 +62,14 @@ pub contract BlockleteMarket_NFT {
     // to allow others to access their sale
     pub resource interface SalePublic {
         pub var cutPercentage: UFix64
-        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @Blockletes_NFT.NFT {
+        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @Blockletes_NFT_V2.NFT {
             post {
                 result.id == tokenID: "The ID of the withdrawn token must be the same as the requested ID"
             }
         }
         pub fun getPrice(tokenID: UInt64): UFix64?
         pub fun getIDs(): [UInt64]
-        pub fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT? {
+        pub fun borrowBlocklete(id: UInt64): &Blockletes_NFT_V2.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -94,7 +94,7 @@ pub contract BlockleteMarket_NFT {
     pub resource SaleCollection: SalePublic {
 
         // A collection of the Blocklete that the user has for sale
-        access(self) var blockletesForSale: @Blockletes_NFT.Collection
+        access(self) var blockletesForSale: @Blockletes_NFT_V2.Collection
 
         // Dictionary of the prices for each NFT by ID
         access(self) var prices: {UInt64: UFix64}
@@ -128,7 +128,7 @@ pub contract BlockleteMarket_NFT {
             }
 
             // create an empty collection to store the Blocklete that are for sale
-            self.blockletesForSale <- Blockletes_NFT.createEmptyCollection() as! @Blockletes_NFT.Collection
+            self.blockletesForSale <- Blockletes_NFT_V2.createEmptyCollection() as! @Blockletes_NFT_V2.Collection
             self.ownerCapability = ownerCapability
             self.beneficiaryCapability = beneficiaryCapability
             // prices are initially empty because there are no Blockletes for sale
@@ -141,7 +141,7 @@ pub contract BlockleteMarket_NFT {
         //
         // Parameters: token: The NFT to be put up for sale
         //             price: The price of the NFT
-        pub fun listForSale(token: @Blockletes_NFT.NFT, price: UFix64) {
+        pub fun listForSale(token: @Blockletes_NFT_V2.NFT, price: UFix64) {
             pre {
                 // Check that price of the listing is > 0
                 price > 0.0: 
@@ -164,12 +164,12 @@ pub contract BlockleteMarket_NFT {
         //
         // Parameters: tokenID: the ID of the token to withdraw from the sale
         //
-        // Returns: @Blockletes_NFT.NFT: The nft that was withdrawn from the sale
-        pub fun withdraw(tokenID: UInt64): @Blockletes_NFT.NFT {
+        // Returns: @Blockletes_NFT_V2.NFT: The nft that was withdrawn from the sale
+        pub fun withdraw(tokenID: UInt64): @Blockletes_NFT_V2.NFT {
 
             // Remove and return the token.
             // Will revert if the token doesn't exist
-            let token <- self.blockletesForSale.withdraw(withdrawID: tokenID) as! @Blockletes_NFT.NFT
+            let token <- self.blockletesForSale.withdraw(withdrawID: tokenID) as! @Blockletes_NFT_V2.NFT
 
             // Remove the price from the prices dictionary
             self.prices.remove(key: tokenID)
@@ -190,8 +190,8 @@ pub contract BlockleteMarket_NFT {
         // Parameters: tokenID: the ID of the NFT to purchase
         //             buyTokens: the fungible tokens that are used to buy the NFT
         //
-        // Returns: @Blockletes_NFT.NFT: the purchased NFT
-        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @Blockletes_NFT.NFT {
+        // Returns: @Blockletes_NFT_V2.NFT: the purchased NFT
+        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @Blockletes_NFT_V2.NFT {
             pre {
                 self.blockletesForSale.ownedNFTs[tokenID] != nil && self.prices[tokenID] != nil:
                     "No token matching this ID for sale!"           
@@ -293,10 +293,10 @@ pub contract BlockleteMarket_NFT {
         //
         // Parameters: id: The ID of the Blocklete to borrow a reference to
         //
-        // Returns: &Blockletes_NFT.NFT? Optional reference to a Blocklete for sale 
+        // Returns: &Blockletes_NFT_V2.NFT? Optional reference to a Blocklete for sale 
         //                        so that the caller can read its data
         //
-        pub fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT? {
+        pub fun borrowBlocklete(id: UInt64): &Blockletes_NFT_V2.NFT? {
             let ref = self.blockletesForSale.borrowBlocklete(id: id)
             return ref
         }
