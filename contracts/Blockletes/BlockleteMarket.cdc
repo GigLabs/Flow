@@ -318,8 +318,8 @@ pub contract BlockleteMarket_NFT_V2 {
     }
 
     init () {
-        self.SaleCollectionStoragePath = /storage/BlockleteMarketCollection_NFT
-        self.SaleCollectionPublicPath = /public/BlockleteMarketCollection_NFT
+        self.SaleCollectionStoragePath = /storage/BlockleteMarketCollection_NFT_V2
+        self.SaleCollectionPublicPath = /public/BlockleteMarketCollection_NFT_V2
     }
 }
  

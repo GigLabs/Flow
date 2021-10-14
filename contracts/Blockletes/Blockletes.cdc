@@ -365,11 +365,11 @@ pub contract Blockletes_NFT_V2: NonFungibleToken {
     //
 	init() {
         // Set our named paths
-        self.CollectionStoragePath = /storage/BlockletesCollection_NFT
-        self.CollectionPublicPath = /public/BlockletesCollection_NFT
-        self.MinterStoragePath = /storage/BlockletesMinter_NFT
-        self.AdminStoragePath = /storage/BlockletesAdmin_NFT
-        self.AdminPrivatePath = /private/BlockletesAdminUpgrade_NFT
+        self.CollectionStoragePath = /storage/BlockletesCollection_NFT_V2
+        self.CollectionPublicPath = /public/BlockletesCollection_NFT_V2
+        self.MinterStoragePath = /storage/BlockletesMinter_NFT_V2
+        self.AdminStoragePath = /storage/BlockletesAdmin_NFT_V2
+        self.AdminPrivatePath = /private/BlockletesAdminUpgrade_NFT_V2
 
         // Initialize the total supply
         self.totalSupply = 0
