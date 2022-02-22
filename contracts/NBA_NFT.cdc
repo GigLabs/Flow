@@ -361,7 +361,7 @@ pub contract NBA_NFT: NonFungibleToken {
 
             let seriesId = NBA_NFT.getSetSeriesId(setId: setId)!
 
-            emit Minted(id: self.id, setId: seriesId, seriesId: seriesId)
+            emit Minted(id: self.id, setId: setId, seriesId: seriesId)
         }
 
         // If the NFT is destroyed, emit an event
