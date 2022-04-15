@@ -1,5 +1,5 @@
 import NonFungibleToken from 0x1d7e57aa55817448
-import AtlantaHawks_NFT from 14c2f30a9e2e923f
+import AtlantaHawks_NFT from 0x14c2f30a9e2e923f
 
 // This transaction installs the AtlantaHawks_NFT collection so an
 // account can receive AtlantaHawks_NFT NFTs 

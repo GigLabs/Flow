@@ -1,7 +1,7 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import AtlantaHawks_NFT from 14c2f30a9e2e923f
+import AtlantaHawks_NFT from 0x14c2f30a9e2e923f
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
