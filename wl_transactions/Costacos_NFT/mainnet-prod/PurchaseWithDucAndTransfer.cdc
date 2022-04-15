@@ -1,33 +1,33 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import RaceDay_NFT from 0x329feb3ab062d289
+import Costacos_NFT from 0x329feb3ab062d289
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
   let paymentVault: @FungibleToken.Vault
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
   let gigNFTCollectionRef: @NonFungibleToken.Collection
-  let buyerNFTCollection: &AnyResource{RaceDay_NFT.RaceDay_NFTCollectionPublic}
+  let buyerNFTCollection: &AnyResource{Costacos_NFT.Costacos_NFTCollectionPublic}
   let balanceBeforeTransfer: UFix64
   let mainDucVault: &DapperUtilityCoin.Vault
       
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&RaceDay_NFT.Collection>(from: RaceDay_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&Costacos_NFT.Collection>(from: Costacos_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-RaceDay_NFT.createEmptyCollection(), to: RaceDay_NFT.CollectionStoragePath)
-        // Create a public capability to the RaceDay_NFT collection
+        buyer.save(<-Costacos_NFT.createEmptyCollection(), to: Costacos_NFT.CollectionStoragePath)
+        // Create a public capability to the Costacos_NFT collection
         // that exposes the Collection interface
-        buyer.link<&RaceDay_NFT.Collection{NonFungibleToken.CollectionPublic,RaceDay_NFT.RaceDay_NFTCollectionPublic}>(
-            RaceDay_NFT.CollectionPublicPath,
-            target: RaceDay_NFT.CollectionStoragePath
+        buyer.link<&Costacos_NFT.Collection{NonFungibleToken.CollectionPublic,Costacos_NFT.Costacos_NFTCollectionPublic}>(
+            Costacos_NFT.CollectionPublicPath,
+            target: Costacos_NFT.CollectionStoragePath
         )
     }
     
     // withdraw NFT
-    let gigNftProvider = gig.borrow<&RaceDay_NFT.Collection>(from: RaceDay_NFT.CollectionStoragePath)
+    let gigNftProvider = gig.borrow<&Costacos_NFT.Collection>(from: Costacos_NFT.CollectionStoragePath)
         ?? panic("Could not borrow NFT Provider")
     self.gigNFTCollectionRef <- gigNftProvider.batchWithdraw(ids: nftIDs)
     // withdraw DUC
@@ -41,12 +41,12 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     ?? panic("Could not borrow receiver reference to the recipient's Vault")
     // set buyer NFT receiver ref
     self.buyerNFTCollection = buyer
-    .getCapability(RaceDay_NFT.CollectionPublicPath)!
-    .borrow<&{RaceDay_NFT.RaceDay_NFTCollectionPublic}>()!
+    .getCapability(Costacos_NFT.CollectionPublicPath)!
+    .borrow<&{Costacos_NFT.Costacos_NFTCollectionPublic}>()!
   }
   pre {
     // Make sure the seller is the right account
-    self.gigAuthAccountAddress == 0x329feb3ab062d289 && sellerAddress == 0x73874e3dd634f3d4: "seller must be GigLabs"
+    self.gigAuthAccountAddress == 0x329feb3ab062d289 && sellerAddress == 0x694472b680c31517: "seller must be GigLabs"
   }
   execute {
     self.sellerPaymentReceiver.deposit(from: <- self.paymentVault)

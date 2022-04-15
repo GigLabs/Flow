@@ -1,12 +1,12 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import RaceDay_NFT from 0x329feb3ab062d289
+import Costacos_NFT from 0x329feb3ab062d289
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let RaceDay_NFTProvider: Capability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let Costacos_NFTProvider: Capability<&Costacos_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let RaceDay_NFTCollectionProviderPrivatePath = /private/RaceDay_NFTCollectionProviderForNFTStorefront
+        let Costacos_NFTCollectionProviderPrivatePath = /private/Costacos_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (RaceDay_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (RaceDay_NFTCollectionProviderPrivatePath, target: RaceDay_NFT.CollectionStoragePath)
+        if !acct.getCapability<&Costacos_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (Costacos_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&Costacos_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (Costacos_NFTCollectionProviderPrivatePath, target: Costacos_NFT.CollectionStoragePath)
         }
 
-        self.RaceDay_NFTProvider = acct.getCapability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(RaceDay_NFTCollectionProviderPrivatePath)!
-        assert(self.RaceDay_NFTProvider.borrow() != nil, message: "Missing or mis-typed RaceDay_NFT.Collection provider")
+        self.Costacos_NFTProvider = acct.getCapability<&Costacos_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(Costacos_NFTCollectionProviderPrivatePath)!
+        assert(self.Costacos_NFTProvider.borrow() != nil, message: "Missing or mis-typed Costacos_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@RaceDay_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@Costacos_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -60,7 +60,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0x73874e3dd634f3d4)
+        let royaltyRecipient = getAccount(0x694472b680c31517)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.RaceDay_NFTProvider,
-            nftType: Type<@RaceDay_NFT.NFT>(),
+            nftProviderCapability: self.Costacos_NFTProvider,
+            nftType: Type<@Costacos_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]
