@@ -3,7 +3,7 @@
 // with the information needed to display in dapper wallet
 // during a listing / sale action
 import NFTStorefront from 0x94b06cfca1d8a476
-import todddapper_NFT from 0xf3e8f8ae2e9e2fec 
+import toddlocal_NFT from 0xf3e8f8ae2e9e2fec 
 pub struct PurchaseData {
     pub let id: UInt64
     pub let name: String?
@@ -30,12 +30,12 @@ pub fun main(address: Address, listingResourceID: UInt64): PurchaseData {
         ?? panic("No item with that ID")
     let listingDetails = saleItem.getDetails()!
     
-    let collection = account.getCapability(todddapper_NFT.CollectionPublicPath)
-    .borrow<&{todddapper_NFT.todddapper_NFTCollectionPublic}>()
+    let collection = account.getCapability(toddlocal_NFT.CollectionPublicPath)
+    .borrow<&{toddlocal_NFT.toddlocal_NFTCollectionPublic}>()
     ?? panic("Could not borrow a reference to the collection")
-    let nft = collection.borrowtodddapper_NFT(id: listingDetails.nftID) 
+    let nft = collection.borrowtoddlocal_NFT(id: listingDetails.nftID) 
             ?? panic("Could not borrow a reference to the collection")
-    let setMeta = todddapper_NFT.getSetMetadata(setId: nft!.setId)!
+    let setMeta = toddlocal_NFT.getSetMetadata(setId: nft!.setId)!
         
     let purchaseData = PurchaseData(
         id: listingDetails.nftID,

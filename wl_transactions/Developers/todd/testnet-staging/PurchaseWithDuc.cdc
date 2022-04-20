@@ -1,7 +1,7 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import todddapper_NFT from 0xf3e8f8ae2e9e2fec
+import toddlocal_NFT from 0xf3e8f8ae2e9e2fec
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
@@ -13,14 +13,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&todddapper_NFT.Collection>(from: todddapper_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&toddlocal_NFT.Collection>(from: toddlocal_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-todddapper_NFT.createEmptyCollection(), to: todddapper_NFT.CollectionStoragePath)
-        // Create a public capability to the todddapper_NFT collection
+        buyer.save(<-toddlocal_NFT.createEmptyCollection(), to: toddlocal_NFT.CollectionStoragePath)
+        // Create a public capability to the toddlocal_NFT collection
         // that exposes the Collection interface
-        buyer.link<&todddapper_NFT.Collection{NonFungibleToken.CollectionPublic,todddapper_NFT.todddapper_NFTCollectionPublic}>(
-            todddapper_NFT.CollectionPublicPath,
-            target: todddapper_NFT.CollectionStoragePath
+        buyer.link<&toddlocal_NFT.Collection{NonFungibleToken.CollectionPublic,toddlocal_NFT.toddlocal_NFTCollectionPublic}>(
+            toddlocal_NFT.CollectionPublicPath,
+            target: toddlocal_NFT.CollectionStoragePath
         )
     }
     
@@ -36,7 +36,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   }
   pre {
     // Make sure the seller is the right account
-    self.gigAuthAccountAddress == 0xf3e8f8ae2e9e2fec && sellerAddress == 0xa60a22bbd219e76b: "seller must be GigLabs"
+    self.gigAuthAccountAddress == 0xf3e8f8ae2e9e2fec && sellerAddress == 0x426d9b66c3e3e7b4: "seller must be GigLabs"
   }
   execute {
     self.sellerPaymentReceiver.deposit(from: <- self.paymentVault)

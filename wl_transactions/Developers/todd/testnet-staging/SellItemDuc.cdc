@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import todddapper_NFT from 0xf3e8f8ae2e9e2fec
+import toddlocal_NFT from 0xf3e8f8ae2e9e2fec
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let todddapper_NFTProvider: Capability<&todddapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let toddlocal_NFTProvider: Capability<&toddlocal_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let todddapper_NFTCollectionProviderPrivatePath = /private/todddapper_NFTCollectionProviderForNFTStorefront
+        let toddlocal_NFTCollectionProviderPrivatePath = /private/toddlocal_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&todddapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (todddapper_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&todddapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (todddapper_NFTCollectionProviderPrivatePath, target: todddapper_NFT.CollectionStoragePath)
+        if !acct.getCapability<&toddlocal_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (toddlocal_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&toddlocal_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (toddlocal_NFTCollectionProviderPrivatePath, target: toddlocal_NFT.CollectionStoragePath)
         }
 
-        self.todddapper_NFTProvider = acct.getCapability<&todddapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(todddapper_NFTCollectionProviderPrivatePath)!
-        assert(self.todddapper_NFTProvider.borrow() != nil, message: "Missing or mis-typed todddapper_NFT.Collection provider")
+        self.toddlocal_NFTProvider = acct.getCapability<&toddlocal_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(toddlocal_NFTCollectionProviderPrivatePath)!
+        assert(self.toddlocal_NFTProvider.borrow() != nil, message: "Missing or mis-typed toddlocal_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@todddapper_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@toddlocal_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -60,7 +60,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0xa60a22bbd219e76b)
+        let royaltyRecipient = getAccount(0x426d9b66c3e3e7b4)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.todddapper_NFTProvider,
-            nftType: Type<@todddapper_NFT.NFT>(),
+            nftProviderCapability: self.toddlocal_NFTProvider,
+            nftType: Type<@toddlocal_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

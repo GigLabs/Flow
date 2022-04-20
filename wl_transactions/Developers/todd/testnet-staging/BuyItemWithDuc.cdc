@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import todddapper_NFT from 0xf3e8f8ae2e9e2fec
+import toddlocal_NFT from 0xf3e8f8ae2e9e2fec
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
-    let todddapper_NFTCollection: &todddapper_NFT.Collection{NonFungibleToken.Receiver}
+    let toddlocal_NFTCollection: &toddlocal_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
     let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
@@ -15,16 +15,16 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
 
     prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&todddapper_NFT.Collection>(from: todddapper_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&toddlocal_NFT.Collection>(from: toddlocal_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-todddapper_NFT.createEmptyCollection(), to: todddapper_NFT.CollectionStoragePath)
+            buyer.save(<-toddlocal_NFT.createEmptyCollection(), to: toddlocal_NFT.CollectionStoragePath)
 
-            // Create a public capability to the todddapper_NFT collection
+            // Create a public capability to the toddlocal_NFT collection
             // that exposes the Collection interface
-            buyer.link<&todddapper_NFT.Collection{NonFungibleToken.CollectionPublic,todddapper_NFT.todddapper_NFTCollectionPublic}>(
-                todddapper_NFT.CollectionPublicPath,
-                target: todddapper_NFT.CollectionStoragePath
+            buyer.link<&toddlocal_NFT.Collection{NonFungibleToken.CollectionPublic,toddlocal_NFT.toddlocal_NFTCollectionPublic}>(
+                toddlocal_NFT.CollectionPublicPath,
+                target: toddlocal_NFT.CollectionStoragePath
             )
         }
 
@@ -48,8 +48,8 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.todddapper_NFTCollection = buyer.borrow<&todddapper_NFT.Collection{NonFungibleToken.Receiver}>(
-            from: todddapper_NFT.CollectionStoragePath
+        self.toddlocal_NFTCollection = buyer.borrow<&toddlocal_NFT.Collection{NonFungibleToken.Receiver}>(
+            from: toddlocal_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }
 
@@ -63,7 +63,7 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
             payment: <-self.paymentVault
         )
 
-        self.todddapper_NFTCollection.deposit(token: <-item)
+        self.toddlocal_NFTCollection.deposit(token: <-item)
 
         // Be kind and recycle
         self.storefront.cleanup(listingResourceID: listingResourceID)
