@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import cnn_NFT from 0x04625c28593d9408
+import CNN_INT_NFT from 0x04625c28593d9408
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let cnn_NFTProvider: Capability<&cnn_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let CNN_INT_NFTProvider: Capability<&CNN_INT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let cnn_NFTCollectionProviderPrivatePath = /private/cnn_NFTCollectionProviderForNFTStorefront
+        let CNN_INT_NFTCollectionProviderPrivatePath = /private/CNN_INT_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&cnn_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (cnn_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&cnn_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (cnn_NFTCollectionProviderPrivatePath, target: cnn_NFT.CollectionStoragePath)
+        if !acct.getCapability<&CNN_INT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (CNN_INT_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&CNN_INT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (CNN_INT_NFTCollectionProviderPrivatePath, target: CNN_INT_NFT.CollectionStoragePath)
         }
 
-        self.cnn_NFTProvider = acct.getCapability<&cnn_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(cnn_NFTCollectionProviderPrivatePath)!
-        assert(self.cnn_NFTProvider.borrow() != nil, message: "Missing or mis-typed cnn_NFT.Collection provider")
+        self.CNN_INT_NFTProvider = acct.getCapability<&CNN_INT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(CNN_INT_NFTCollectionProviderPrivatePath)!
+        assert(self.CNN_INT_NFTProvider.borrow() != nil, message: "Missing or mis-typed CNN_INT_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@cnn_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@CNN_INT_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.cnn_NFTProvider,
-            nftType: Type<@cnn_NFT.NFT>(),
+            nftProviderCapability: self.CNN_INT_NFTProvider,
+            nftType: Type<@CNN_INT_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

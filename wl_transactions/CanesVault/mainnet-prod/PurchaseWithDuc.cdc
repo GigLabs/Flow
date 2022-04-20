@@ -1,7 +1,7 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import CanesVault_NFT from 0x329feb3ab062d289
+import Canes_Vault_NFT from 0x329feb3ab062d289
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
@@ -13,14 +13,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&CanesVault_NFT.Collection>(from: CanesVault_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&Canes_Vault_NFT.Collection>(from: Canes_Vault_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-CanesVault_NFT.createEmptyCollection(), to: CanesVault_NFT.CollectionStoragePath)
-        // Create a public capability to the CanesVault_NFT collection
+        buyer.save(<-Canes_Vault_NFT.createEmptyCollection(), to: Canes_Vault_NFT.CollectionStoragePath)
+        // Create a public capability to the Canes_Vault_NFT collection
         // that exposes the Collection interface
-        buyer.link<&CanesVault_NFT.Collection{NonFungibleToken.CollectionPublic,CanesVault_NFT.CanesVault_NFTCollectionPublic}>(
-            CanesVault_NFT.CollectionPublicPath,
-            target: CanesVault_NFT.CollectionStoragePath
+        buyer.link<&Canes_Vault_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_NFT.Canes_Vault_NFTCollectionPublic}>(
+            Canes_Vault_NFT.CollectionPublicPath,
+            target: Canes_Vault_NFT.CollectionStoragePath
         )
     }
     

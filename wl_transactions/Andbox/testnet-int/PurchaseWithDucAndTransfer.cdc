@@ -1,33 +1,33 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import andbox_NFT from 0x04625c28593d9408
+import AndBoxINT_NFT from 0x04625c28593d9408
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
   let paymentVault: @FungibleToken.Vault
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
   let gigNFTCollectionRef: @NonFungibleToken.Collection
-  let buyerNFTCollection: &AnyResource{andbox_NFT.andbox_NFTCollectionPublic}
+  let buyerNFTCollection: &AnyResource{AndBoxINT_NFT.AndBoxINT_NFTCollectionPublic}
   let balanceBeforeTransfer: UFix64
   let mainDucVault: &DapperUtilityCoin.Vault
       
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&andbox_NFT.Collection>(from: andbox_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&AndBoxINT_NFT.Collection>(from: AndBoxINT_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-andbox_NFT.createEmptyCollection(), to: andbox_NFT.CollectionStoragePath)
-        // Create a public capability to the andbox_NFT collection
+        buyer.save(<-AndBoxINT_NFT.createEmptyCollection(), to: AndBoxINT_NFT.CollectionStoragePath)
+        // Create a public capability to the AndBoxINT_NFT collection
         // that exposes the Collection interface
-        buyer.link<&andbox_NFT.Collection{NonFungibleToken.CollectionPublic,andbox_NFT.andbox_NFTCollectionPublic}>(
-            andbox_NFT.CollectionPublicPath,
-            target: andbox_NFT.CollectionStoragePath
+        buyer.link<&AndBoxINT_NFT.Collection{NonFungibleToken.CollectionPublic,AndBoxINT_NFT.AndBoxINT_NFTCollectionPublic}>(
+            AndBoxINT_NFT.CollectionPublicPath,
+            target: AndBoxINT_NFT.CollectionStoragePath
         )
     }
     
     // withdraw NFT
-    let gigNftProvider = gig.borrow<&andbox_NFT.Collection>(from: andbox_NFT.CollectionStoragePath)
+    let gigNftProvider = gig.borrow<&AndBoxINT_NFT.Collection>(from: AndBoxINT_NFT.CollectionStoragePath)
         ?? panic("Could not borrow NFT Provider")
     self.gigNFTCollectionRef <- gigNftProvider.batchWithdraw(ids: nftIDs)
     // withdraw DUC
@@ -41,8 +41,8 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     ?? panic("Could not borrow receiver reference to the recipient's Vault")
     // set buyer NFT receiver ref
     self.buyerNFTCollection = buyer
-    .getCapability(andbox_NFT.CollectionPublicPath)!
-    .borrow<&{andbox_NFT.andbox_NFTCollectionPublic}>()!
+    .getCapability(AndBoxINT_NFT.CollectionPublicPath)!
+    .borrow<&{AndBoxINT_NFT.AndBoxINT_NFTCollectionPublic}>()!
   }
   pre {
     // Make sure the seller is the right account

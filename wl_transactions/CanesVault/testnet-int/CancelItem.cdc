@@ -1,6 +1,6 @@
 import NFTStorefront from 0x94b06cfca1d8a476
 
-// canesvault_NFT
+// Canes_Vault_Int_NFT
 transaction(listingResourceID: UInt64) {
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontManager}
 

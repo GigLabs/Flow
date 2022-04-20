@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import andbox_NFT from 0x04625c28593d9408
+import AndBoxINT_NFT from 0x04625c28593d9408
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
-    let andbox_NFTCollection: &andbox_NFT.Collection{NonFungibleToken.Receiver}
+    let AndBoxINT_NFTCollection: &AndBoxINT_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
     let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
@@ -15,16 +15,16 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
 
     prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&andbox_NFT.Collection>(from: andbox_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&AndBoxINT_NFT.Collection>(from: AndBoxINT_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-andbox_NFT.createEmptyCollection(), to: andbox_NFT.CollectionStoragePath)
+            buyer.save(<-AndBoxINT_NFT.createEmptyCollection(), to: AndBoxINT_NFT.CollectionStoragePath)
 
-            // Create a public capability to the andbox_NFT collection
+            // Create a public capability to the AndBoxINT_NFT collection
             // that exposes the Collection interface
-            buyer.link<&andbox_NFT.Collection{NonFungibleToken.CollectionPublic,andbox_NFT.andbox_NFTCollectionPublic}>(
-                andbox_NFT.CollectionPublicPath,
-                target: andbox_NFT.CollectionStoragePath
+            buyer.link<&AndBoxINT_NFT.Collection{NonFungibleToken.CollectionPublic,AndBoxINT_NFT.AndBoxINT_NFTCollectionPublic}>(
+                AndBoxINT_NFT.CollectionPublicPath,
+                target: AndBoxINT_NFT.CollectionStoragePath
             )
         }
 
@@ -48,8 +48,8 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.andbox_NFTCollection = buyer.borrow<&andbox_NFT.Collection{NonFungibleToken.Receiver}>(
-            from: andbox_NFT.CollectionStoragePath
+        self.AndBoxINT_NFTCollection = buyer.borrow<&AndBoxINT_NFT.Collection{NonFungibleToken.Receiver}>(
+            from: AndBoxINT_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }
 
@@ -63,7 +63,7 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
             payment: <-self.paymentVault
         )
 
-        self.andbox_NFTCollection.deposit(token: <-item)
+        self.AndBoxINT_NFTCollection.deposit(token: <-item)
 
         // Be kind and recycle
         self.storefront.cleanup(listingResourceID: listingResourceID)

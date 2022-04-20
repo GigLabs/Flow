@@ -1,7 +1,7 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import cnn_NFT from 0x04625c28593d9408
+import CNN_INT_NFT from 0x04625c28593d9408
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
@@ -13,14 +13,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&cnn_NFT.Collection>(from: cnn_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&CNN_INT_NFT.Collection>(from: CNN_INT_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-cnn_NFT.createEmptyCollection(), to: cnn_NFT.CollectionStoragePath)
-        // Create a public capability to the cnn_NFT collection
+        buyer.save(<-CNN_INT_NFT.createEmptyCollection(), to: CNN_INT_NFT.CollectionStoragePath)
+        // Create a public capability to the CNN_INT_NFT collection
         // that exposes the Collection interface
-        buyer.link<&cnn_NFT.Collection{NonFungibleToken.CollectionPublic,cnn_NFT.cnn_NFTCollectionPublic}>(
-            cnn_NFT.CollectionPublicPath,
-            target: cnn_NFT.CollectionStoragePath
+        buyer.link<&CNN_INT_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_INT_NFT.CNN_INT_NFTCollectionPublic}>(
+            CNN_INT_NFT.CollectionPublicPath,
+            target: CNN_INT_NFT.CollectionStoragePath
         )
     }
     

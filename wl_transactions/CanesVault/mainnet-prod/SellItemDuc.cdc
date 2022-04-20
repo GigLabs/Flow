@@ -1,12 +1,12 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import CanesVault_NFT from 0x329feb3ab062d289
+import Canes_Vault_NFT from 0x329feb3ab062d289
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let CanesVault_NFTProvider: Capability<&CanesVault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let Canes_Vault_NFTProvider: Capability<&Canes_Vault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let CanesVault_NFTCollectionProviderPrivatePath = /private/CanesVault_NFTCollectionProviderForNFTStorefront
+        let Canes_Vault_NFTCollectionProviderPrivatePath = /private/Canes_Vault_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&CanesVault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (CanesVault_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&CanesVault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (CanesVault_NFTCollectionProviderPrivatePath, target: CanesVault_NFT.CollectionStoragePath)
+        if !acct.getCapability<&Canes_Vault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (Canes_Vault_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&Canes_Vault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (Canes_Vault_NFTCollectionProviderPrivatePath, target: Canes_Vault_NFT.CollectionStoragePath)
         }
 
-        self.CanesVault_NFTProvider = acct.getCapability<&CanesVault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(CanesVault_NFTCollectionProviderPrivatePath)!
-        assert(self.CanesVault_NFTProvider.borrow() != nil, message: "Missing or mis-typed CanesVault_NFT.Collection provider")
+        self.Canes_Vault_NFTProvider = acct.getCapability<&Canes_Vault_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(Canes_Vault_NFTCollectionProviderPrivatePath)!
+        assert(self.Canes_Vault_NFTProvider.borrow() != nil, message: "Missing or mis-typed Canes_Vault_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@CanesVault_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@Canes_Vault_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.CanesVault_NFTProvider,
-            nftType: Type<@CanesVault_NFT.NFT>(),
+            nftProviderCapability: self.Canes_Vault_NFTProvider,
+            nftType: Type<@Canes_Vault_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

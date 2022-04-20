@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import andbox_NFT from 0x04625c28593d9408
+import AndBoxINT_NFT from 0x04625c28593d9408
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let andbox_NFTProvider: Capability<&andbox_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let AndBoxINT_NFTProvider: Capability<&AndBoxINT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let andbox_NFTCollectionProviderPrivatePath = /private/andbox_NFTCollectionProviderForNFTStorefront
+        let AndBoxINT_NFTCollectionProviderPrivatePath = /private/AndBoxINT_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&andbox_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (andbox_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&andbox_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (andbox_NFTCollectionProviderPrivatePath, target: andbox_NFT.CollectionStoragePath)
+        if !acct.getCapability<&AndBoxINT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (AndBoxINT_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&AndBoxINT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (AndBoxINT_NFTCollectionProviderPrivatePath, target: AndBoxINT_NFT.CollectionStoragePath)
         }
 
-        self.andbox_NFTProvider = acct.getCapability<&andbox_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(andbox_NFTCollectionProviderPrivatePath)!
-        assert(self.andbox_NFTProvider.borrow() != nil, message: "Missing or mis-typed andbox_NFT.Collection provider")
+        self.AndBoxINT_NFTProvider = acct.getCapability<&AndBoxINT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(AndBoxINT_NFTCollectionProviderPrivatePath)!
+        assert(self.AndBoxINT_NFTProvider.borrow() != nil, message: "Missing or mis-typed AndBoxINT_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@andbox_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@AndBoxINT_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.andbox_NFTProvider,
-            nftType: Type<@andbox_NFT.NFT>(),
+            nftProviderCapability: self.AndBoxINT_NFTProvider,
+            nftType: Type<@AndBoxINT_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

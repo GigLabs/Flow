@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import cnn_NFT from 0x04625c28593d9408
+import CNN_INT_NFT from 0x04625c28593d9408
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
-    let cnn_NFTCollection: &cnn_NFT.Collection{NonFungibleToken.Receiver}
+    let CNN_INT_NFTCollection: &CNN_INT_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
     let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
@@ -15,16 +15,16 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
 
     prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&cnn_NFT.Collection>(from: cnn_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&CNN_INT_NFT.Collection>(from: CNN_INT_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-cnn_NFT.createEmptyCollection(), to: cnn_NFT.CollectionStoragePath)
+            buyer.save(<-CNN_INT_NFT.createEmptyCollection(), to: CNN_INT_NFT.CollectionStoragePath)
 
-            // Create a public capability to the cnn_NFT collection
+            // Create a public capability to the CNN_INT_NFT collection
             // that exposes the Collection interface
-            buyer.link<&cnn_NFT.Collection{NonFungibleToken.CollectionPublic,cnn_NFT.cnn_NFTCollectionPublic}>(
-                cnn_NFT.CollectionPublicPath,
-                target: cnn_NFT.CollectionStoragePath
+            buyer.link<&CNN_INT_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_INT_NFT.CNN_INT_NFTCollectionPublic}>(
+                CNN_INT_NFT.CollectionPublicPath,
+                target: CNN_INT_NFT.CollectionStoragePath
             )
         }
 
@@ -48,8 +48,8 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.cnn_NFTCollection = buyer.borrow<&cnn_NFT.Collection{NonFungibleToken.Receiver}>(
-            from: cnn_NFT.CollectionStoragePath
+        self.CNN_INT_NFTCollection = buyer.borrow<&CNN_INT_NFT.Collection{NonFungibleToken.Receiver}>(
+            from: CNN_INT_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }
 
@@ -63,7 +63,7 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice
             payment: <-self.paymentVault
         )
 
-        self.cnn_NFTCollection.deposit(token: <-item)
+        self.CNN_INT_NFTCollection.deposit(token: <-item)
 
         // Be kind and recycle
         self.storefront.cleanup(listingResourceID: listingResourceID)
