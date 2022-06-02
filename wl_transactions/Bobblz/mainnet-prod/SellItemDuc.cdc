@@ -1,17 +1,15 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import RaceDay_NFT from 0x329feb3ab062d289
+import Bobblz_NFT from 0xd45e2bd9a3d5003b
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let RaceDay_NFTProvider: Capability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let Bobblz_NFTProvider: Capability<&Bobblz_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
-    let gigAddress: Address
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
-        self.gigAddress = gig.address
         // If the account doesn't already have a Storefront
         if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
 
@@ -29,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let RaceDay_NFTCollectionProviderPrivatePath = /private/RaceDay_NFTCollectionProviderForNFTStorefront
+        let Bobblz_NFTCollectionProviderPrivatePath = /private/Bobblz_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (RaceDay_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (RaceDay_NFTCollectionProviderPrivatePath, target: RaceDay_NFT.CollectionStoragePath)
+        if !acct.getCapability<&Bobblz_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (Bobblz_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&Bobblz_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (Bobblz_NFTCollectionProviderPrivatePath, target: Bobblz_NFT.CollectionStoragePath)
         }
 
-        self.RaceDay_NFTProvider = acct.getCapability<&RaceDay_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(RaceDay_NFTCollectionProviderPrivatePath)!
-        assert(self.RaceDay_NFTProvider.borrow() != nil, message: "Missing or mis-typed RaceDay_NFT.Collection provider")
+        self.Bobblz_NFTProvider = acct.getCapability<&Bobblz_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(Bobblz_NFTCollectionProviderPrivatePath)!
+        assert(self.Bobblz_NFTProvider.borrow() != nil, message: "Missing or mis-typed Bobblz_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -50,21 +48,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@RaceDay_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@Bobblz_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
         }
     }
-    pre {
-        self.gigAddress == 0x329feb3ab062d289: "Requires valid authorizing signature"
-    }
+
     execute {
         let amountSeller = saleItemPrice * (1.0 - royaltyPercent)
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0xf2d2901d91dc6611)
+        let royaltyRecipient = getAccount(0xe1017353df3267e4)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
@@ -81,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.RaceDay_NFTProvider,
-            nftType: Type<@RaceDay_NFT.NFT>(),
+            nftProviderCapability: self.Bobblz_NFTProvider,
+            nftType: Type<@Bobblz_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

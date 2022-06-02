@@ -1,29 +1,35 @@
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
-import RaceDay_NFT from 0x329feb3ab062d289
+import Bobblz_NFT from 0xd45e2bd9a3d5003b
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
   let paymentVault: @FungibleToken.Vault
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
+  let gigNFTCollectionRef: @NonFungibleToken.Collection
+  let buyerNFTCollection: &AnyResource{Bobblz_NFT.Bobblz_NFTCollectionPublic}
   let balanceBeforeTransfer: UFix64
   let mainDucVault: &DapperUtilityCoin.Vault
       
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&RaceDay_NFT.Collection>(from: RaceDay_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath) == nil {
         // Create a new empty collection and save it to the account
-        buyer.save(<-RaceDay_NFT.createEmptyCollection(), to: RaceDay_NFT.CollectionStoragePath)
-        // Create a public capability to the RaceDay_NFT collection
+        buyer.save(<-Bobblz_NFT.createEmptyCollection(), to: Bobblz_NFT.CollectionStoragePath)
+        // Create a public capability to the Bobblz_NFT collection
         // that exposes the Collection interface
-        buyer.link<&RaceDay_NFT.Collection{NonFungibleToken.CollectionPublic,RaceDay_NFT.RaceDay_NFTCollectionPublic}>(
-            RaceDay_NFT.CollectionPublicPath,
-            target: RaceDay_NFT.CollectionStoragePath
+        buyer.link<&Bobblz_NFT.Collection{NonFungibleToken.CollectionPublic,Bobblz_NFT.Bobblz_NFTCollectionPublic}>(
+            Bobblz_NFT.CollectionPublicPath,
+            target: Bobblz_NFT.CollectionStoragePath
         )
     }
     
+    // withdraw NFT
+    let gigNftProvider = gig.borrow<&Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath)
+        ?? panic("Could not borrow NFT Provider")
+    self.gigNFTCollectionRef <- gigNftProvider.batchWithdraw(ids: nftIDs)
     // withdraw DUC
     self.mainDucVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
         ?? panic("Could not borrow reference to Dapper Utility Coin vault")
@@ -33,13 +39,18 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     self.sellerPaymentReceiver = getAccount(sellerAddress).getCapability(/public/dapperUtilityCoinReceiver)
     .borrow<&{FungibleToken.Receiver}>()
     ?? panic("Could not borrow receiver reference to the recipient's Vault")
+    // set buyer NFT receiver ref
+    self.buyerNFTCollection = buyer
+    .getCapability(Bobblz_NFT.CollectionPublicPath)!
+    .borrow<&{Bobblz_NFT.Bobblz_NFTCollectionPublic}>()!
   }
   pre {
     // Make sure the seller is the right account
-    self.gigAuthAccountAddress == 0x329feb3ab062d289 && sellerAddress == 0xf2d2901d91dc6611: "seller must be GigLabs"
+    self.gigAuthAccountAddress == 0xd45e2bd9a3d5003b && sellerAddress == 0xe1017353df3267e4: "seller must be GigLabs"
   }
   execute {
     self.sellerPaymentReceiver.deposit(from: <- self.paymentVault)
+    self.buyerNFTCollection.batchDeposit(tokens: <-self.gigNFTCollectionRef)
   }
   post {
     // Ensure there is no DUC leakage

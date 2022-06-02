@@ -60,7 +60,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0x73874e3dd634f3d4)
+        let royaltyRecipient = getAccount(0xf2d2901d91dc6611)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
