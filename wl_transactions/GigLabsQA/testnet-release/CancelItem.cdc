@@ -1,4 +1,4 @@
-import NFTStorefront from 
+import NFTStorefront from 0x94b06cfca1d8a476
 
 // GigLabsQA_NFT
 transaction(listingResourceID: UInt64) {

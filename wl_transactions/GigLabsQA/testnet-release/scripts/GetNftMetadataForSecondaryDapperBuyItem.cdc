@@ -2,8 +2,8 @@
 // Get metadata for a single NFT in a owner's collection
 // needed to display the NFT in dapper wallet
 // during the secondary purchase of an NFT
-import GigLabsQA_NFT from 
-import NFTStorefront from 
+import GigLabsQA_NFT from 0x18445fd03b683069
+import NFTStorefront from 0x94b06cfca1d8a476
 
 pub struct PurchaseData {
     pub let id: UInt64

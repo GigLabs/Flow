@@ -1,8 +1,8 @@
-import FungibleToken from 
-import NonFungibleToken from 
-import DapperUtilityCoin from 0xFUNGIBLETOKEN
-import GigLabsQA_NFT from 
-import NFTStorefront from 
+import FungibleToken from 0x9a0766d93b6608b7
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import DapperUtilityCoin from 0x82ec283f88a62e65
+import GigLabsQA_NFT from 0x18445fd03b683069
+import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
@@ -57,14 +57,14 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
     }
     pre {
-        self.gigAddress == : "Requires valid authorizing signature"
+        self.gigAddress == 0x18445fd03b683069: "Requires valid authorizing signature"
     }
     execute {
         let amountSeller = saleItemPrice * (1.0 - royaltyPercent)
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(_ROYALTY_ADDRESS)
+        let royaltyRecipient = getAccount(0x6f8aa41eedff1158)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)

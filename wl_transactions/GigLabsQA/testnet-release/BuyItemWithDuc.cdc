@@ -1,8 +1,8 @@
-import FungibleToken from 
-import NonFungibleToken from 
-import GigLabsQA_NFT from 
-import DapperUtilityCoin from 0xGENERAL_FUNGIBLE_ADDRESS
-import NFTStorefront from 
+import FungibleToken from 0x9a0766d93b6608b7
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import GigLabsQA_NFT from 0x18445fd03b683069
+import DapperUtilityCoin from 0x82ec283f88a62e65
+import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
