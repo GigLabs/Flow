@@ -384,7 +384,7 @@ pub contract UFC_NFT: NonFungibleToken {
                 case Type<MetadataViews.Royalties>():
                     let royalties: [MetadataViews.Royalty] = []
                     // We only have a legacy {String: String} dictionary to store royalty information.
-                    // There may be multiple royalty cuts defined per NFT. Pull the each royalty
+                    // There may be multiple royalty cuts defined per NFT. Pull each royalty
                     // based on keys that have the "royalty_addr_" prefix in the dictionary.
                     for metadataKey in UFC_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
@@ -395,12 +395,14 @@ pub contract UFC_NFT: NonFungibleToken {
                                 let royaltyReceiver: PublicPath = PublicPath(identifier: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
                                 let royaltyCut = UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
                                 let cutValue: UFix64 = UFC_NFT.royaltyCutStringToUFix64(royaltyCut)
-                                royalties.append(MetadataViews.Royalty(
-                                    receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
-                                    cut: cutValue,
-                                    description: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
-                                )
-                                )
+                                if cutValue != 0.0 {
+                                    royalties.append(MetadataViews.Royalty(
+                                        receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
+                                        cut: cutValue,
+                                        description: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
+                                    )
+                                    )
+                                }
                             }
                         }
                     }
@@ -410,9 +412,9 @@ pub contract UFC_NFT: NonFungibleToken {
                         storagePath: UFC_NFT.CollectionStoragePath,
                         publicPath: UFC_NFT.CollectionPublicPath,
                         providerPath: /private/UFC_NFT,
-                        publicCollection: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic}>(),
+                        publicCollection: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         publicLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
-                        providerLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
                             return <-UFC_NFT.createEmptyCollection()
                         })
@@ -422,13 +424,13 @@ pub contract UFC_NFT: NonFungibleToken {
                         file: MetadataViews.HTTPFile(
                             url: "https://PLACEHOLDER_FOR_APP_URL.com/SQUARE_IMAGE_FILE_NAME"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_MIME_TYPE"
+                        mediaType: "PLACEHOLDER_FOR_SQUARE_MIME_TYPE"
                     )
                     let bannerImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://PLACEHOLDER_FOR_APP_URL.com/SQUARE_IMAGE_FILE_NAME"
+                            url: "https://PLACEHOLDER_FOR_APP_URL.com/BANNER_IMAGE_FILE_NAME"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_MIME_TYPE"
+                        mediaType: "PLACEHOLDER_FOR_BANNER_MIME_TYPE"
                     )
                     return MetadataViews.NFTCollectionDisplay(
                         name: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
@@ -773,9 +775,11 @@ pub contract UFC_NFT: NonFungibleToken {
             } else if royaltyCut[0] == "0" {
                 decimalPos = 2
             }
+        } else {
+            // Invalid royalty value
+            return 0.0
         }
-        assert(decimalPos != 0, message: "Invalid royalty cut value")
-        
+
         var royaltyCutStrLen = royaltyCut.length
         if royaltyCut.length > (8 + decimalPos) {
             // UFix64 is capped at 8 digits after the decimal

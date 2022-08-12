@@ -1,7 +1,7 @@
 
-import FungibleToken from 0xee82856bf20e2aa6
-import NonFungibleToken from 0xeba53f0e8880ccdd
-import MetadataViews from 0xeba53f0e8880ccdd
+import FungibleToken from 0xf233dcee88fe0abe
+import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
 
 pub contract RogueBunnies_NFT: NonFungibleToken {
 
@@ -384,7 +384,7 @@ pub contract RogueBunnies_NFT: NonFungibleToken {
                 case Type<MetadataViews.Royalties>():
                     let royalties: [MetadataViews.Royalty] = []
                     // We only have a legacy {String: String} dictionary to store royalty information.
-                    // There may be multiple royalty cuts defined per NFT. Pull the each royalty
+                    // There may be multiple royalty cuts defined per NFT. Pull each royalty
                     // based on keys that have the "royalty_addr_" prefix in the dictionary.
                     for metadataKey in RogueBunnies_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
@@ -395,12 +395,14 @@ pub contract RogueBunnies_NFT: NonFungibleToken {
                                 let royaltyReceiver: PublicPath = PublicPath(identifier: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
                                 let royaltyCut = RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
                                 let cutValue: UFix64 = RogueBunnies_NFT.royaltyCutStringToUFix64(royaltyCut)
-                                royalties.append(MetadataViews.Royalty(
-                                    receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
-                                    cut: cutValue,
-                                    description: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
-                                )
-                                )
+                                if cutValue != 0.0 {
+                                    royalties.append(MetadataViews.Royalty(
+                                        receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
+                                        cut: cutValue,
+                                        description: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
+                                    )
+                                    )
+                                }
                             }
                         }
                     }
@@ -410,9 +412,9 @@ pub contract RogueBunnies_NFT: NonFungibleToken {
                         storagePath: RogueBunnies_NFT.CollectionStoragePath,
                         publicPath: RogueBunnies_NFT.CollectionPublicPath,
                         providerPath: /private/RogueBunnies_NFT,
-                        publicCollection: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic}>(),
+                        publicCollection: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         publicLinkedType: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
-                        providerLinkedType: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
                             return <-RogueBunnies_NFT.createEmptyCollection()
                         })
@@ -422,13 +424,13 @@ pub contract RogueBunnies_NFT: NonFungibleToken {
                         file: MetadataViews.HTTPFile(
                             url: "https://PLACEHOLDER_FOR_APP_URL.com/SQUARE_IMAGE_FILE_NAME"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_MIME_TYPE"
+                        mediaType: "PLACEHOLDER_FOR_SQUARE_MIME_TYPE"
                     )
                     let bannerImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://PLACEHOLDER_FOR_APP_URL.com/SQUARE_IMAGE_FILE_NAME"
+                            url: "https://PLACEHOLDER_FOR_APP_URL.com/BANNER_IMAGE_FILE_NAME"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_MIME_TYPE"
+                        mediaType: "PLACEHOLDER_FOR_BANNER_MIME_TYPE"
                     )
                     return MetadataViews.NFTCollectionDisplay(
                         name: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
@@ -773,9 +775,11 @@ pub contract RogueBunnies_NFT: NonFungibleToken {
             } else if royaltyCut[0] == "0" {
                 decimalPos = 2
             }
+        } else {
+            // Invalid royalty value
+            return 0.0
         }
-        assert(decimalPos != 0, message: "Invalid royalty cut value")
-        
+
         var royaltyCutStrLen = royaltyCut.length
         if royaltyCut.length > (8 + decimalPos) {
             // UFix64 is capped at 8 digits after the decimal
