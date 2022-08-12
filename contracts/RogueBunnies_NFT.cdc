@@ -1,13 +1,13 @@
 
-import FungibleToken from 0xf233dcee88fe0abe
-import NonFungibleToken from 0x1d7e57aa55817448
-import MetadataViews from 0x1d7e57aa55817448
+import FungibleToken from 0xee82856bf20e2aa6
+import NonFungibleToken from 0xeba53f0e8880ccdd
+import MetadataViews from 0xeba53f0e8880ccdd
 
-pub contract UFC_NFT: NonFungibleToken {
+pub contract RogueBunnies_NFT: NonFungibleToken {
 
-    // UFC_NFT Events
+    // RogueBunnies_NFT Events
     //
-    // Emitted when the UFC_NFT contract is created
+    // Emitted when the RogueBunnies_NFT contract is created
     pub event ContractInitialized()
 
     // Emitted when an NFT is minted
@@ -47,7 +47,7 @@ pub contract UFC_NFT: NonFungibleToken {
     pub let AdminPrivatePath: PrivatePath
 
     // totalSupply
-    // The total number of UFC_NFT that have been minted
+    // The total number of RogueBunnies_NFT that have been minted
     //
     pub var totalSupply: UInt64
 
@@ -133,7 +133,7 @@ pub contract UFC_NFT: NonFungibleToken {
     }
 
 
-    // A Series is special resource type that contains functions to mint UFC_NFT NFTs, 
+    // A Series is special resource type that contains functions to mint RogueBunnies_NFT NFTs, 
     // add NFTSets, update NFTSet and Series metadata, and seal Series.
 	pub resource Series {
 
@@ -162,7 +162,7 @@ pub contract UFC_NFT: NonFungibleToken {
             self.setIds = []
             self.setSealedState = {}
 
-            UFC_NFT.seriesData[seriesId] = SeriesData(
+            RogueBunnies_NFT.seriesData[seriesId] = SeriesData(
                     seriesId: seriesId,
                     metadata: metadata
             )
@@ -195,7 +195,7 @@ pub contract UFC_NFT: NonFungibleToken {
             self.numberEditionsMintedPerSet[setId] = 0
 
             // Store it in the sets mapping field
-            UFC_NFT.setData[setId] = newNFTSet
+            RogueBunnies_NFT.setData[setId] = newNFTSet
 
             emit SetCreated(seriesId: self.seriesId, setId: setId)
         }
@@ -215,7 +215,7 @@ pub contract UFC_NFT: NonFungibleToken {
                     metadata: metadata
             )  
             // Store updated Series in the Series mapping field
-            UFC_NFT.seriesData[self.seriesId] = newSeriesMetadata
+            RogueBunnies_NFT.seriesData[self.seriesId] = newSeriesMetadata
 
             emit SeriesMetadataUpdated(seriesId: self.seriesId)
         }
@@ -243,23 +243,23 @@ pub contract UFC_NFT: NonFungibleToken {
                 metadata: metadata
             )
             // Store updated Set in the Sets mapping field
-            UFC_NFT.setData[setId] = newSetMetadata
+            RogueBunnies_NFT.setData[setId] = newSetMetadata
 
             emit SetMetadataUpdated(seriesId: self.seriesId, setId: setId)
         }
 
-		// mintUFC_NFT
+		// mintRogueBunnies_NFT
         // Mints a new NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
         //
-	    pub fun mintUFC_NFT(
+	    pub fun mintRogueBunnies_NFT(
             recipient: &{NonFungibleToken.CollectionPublic},
             tokenId: UInt64,
             setId: UInt32) {
             
             pre {
                 self.numberEditionsMintedPerSet[setId] != nil: "The Set does not exist."
-                self.numberEditionsMintedPerSet[setId]! <= UFC_NFT.getSetMaxEditions(setId: setId)!:
+                self.numberEditionsMintedPerSet[setId]! <= RogueBunnies_NFT.getSetMaxEditions(setId: setId)!:
                     "Set has reached maximum NFT edition capacity."
             }
 
@@ -268,23 +268,23 @@ pub contract UFC_NFT: NonFungibleToken {
             let editionNum: UInt32 = self.numberEditionsMintedPerSet[setId]! + (1 as UInt32)
 
 			// deposit it in the recipient's account using their reference
-			recipient.deposit(token: <-create UFC_NFT.NFT(
+			recipient.deposit(token: <-create RogueBunnies_NFT.NFT(
                 tokenId: tokenId,
                 setId: setId,
                 editionNum: editionNum
             ))
 
             // Increment the count of global NFTs 
-            UFC_NFT.totalSupply = UFC_NFT.totalSupply + (1 as UInt64)
+            RogueBunnies_NFT.totalSupply = RogueBunnies_NFT.totalSupply + (1 as UInt64)
 
             // Update the count of Editions minted in the set
             self.numberEditionsMintedPerSet[setId] = editionNum
         }
 
-        // batchMintUFC_NFT
+        // batchMintRogueBunnies_NFT
         // Mints multiple new NFTs given and deposits the NFTs
         // into the recipients collection using their collection reference
-		pub fun batchMintUFC_NFT(
+		pub fun batchMintRogueBunnies_NFT(
             recipient: &{NonFungibleToken.CollectionPublic},
             setId: UInt32,
             tokenIds: [UInt64]) {
@@ -295,7 +295,7 @@ pub contract UFC_NFT: NonFungibleToken {
             }
 
             for tokenId in tokenIds {
-                self.mintUFC_NFT(
+                self.mintRogueBunnies_NFT(
                     recipient: recipient,
                     tokenId: tokenId,
                     setId: setId
@@ -317,7 +317,7 @@ pub contract UFC_NFT: NonFungibleToken {
         }
 	}
 
-    // A resource that represents the UFC_NFT NFT
+    // A resource that represents the RogueBunnies_NFT NFT
     //
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         // The token's ID
@@ -340,7 +340,7 @@ pub contract UFC_NFT: NonFungibleToken {
             self.setId = setId
             self.editionNum = editionNum
 
-            let seriesId = UFC_NFT.getSetSeriesId(setId: setId)!
+            let seriesId = RogueBunnies_NFT.getSetSeriesId(setId: setId)!
 
             emit Minted(id: self.id, setId: setId, seriesId: seriesId)
         }
@@ -362,10 +362,10 @@ pub contract UFC_NFT: NonFungibleToken {
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
-                        name: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
-                        description: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        name: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
                         thumbnail: MetadataViews.HTTPFile(
-                            url: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "preview")!
+                            url: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "preview")!
                         )
                     )
                 case Type<MetadataViews.Serial>():
@@ -373,32 +373,32 @@ pub contract UFC_NFT: NonFungibleToken {
                         self.id
                     )
                 case Type<MetadataViews.Editions>():
-                    let maxEditions = UFC_NFT.setData[self.setId]?.maxEditions ?? 0
+                    let maxEditions = RogueBunnies_NFT.setData[self.setId]?.maxEditions ?? 0
                     let editionInfo = MetadataViews.Edition(name: "Edition", number: UInt64(self.editionNum), max: maxEditions > 0 ? UInt64(maxEditions) : nil)
                     let editionList: [MetadataViews.Edition] = [editionInfo]
                     return MetadataViews.Editions(
                         editionList
                     )
                 case Type<MetadataViews.ExternalURL>():
-                    return MetadataViews.ExternalURL(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
+                    return MetadataViews.ExternalURL(RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
                 case Type<MetadataViews.Royalties>():
                     let royalties: [MetadataViews.Royalty] = []
                     // We only have a legacy {String: String} dictionary to store royalty information.
                     // There may be multiple royalty cuts defined per NFT. Pull the each royalty
                     // based on keys that have the "royalty_addr_" prefix in the dictionary.
-                    for metadataKey in UFC_NFT.getSetMetadata(setId: self.setId)!.keys {
+                    for metadataKey in RogueBunnies_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
                         if metadataKey.length >= 13 {
                             if metadataKey.slice(from: 0, upTo: 13) == "royalty_addr_" {
                                 let royaltyName = metadataKey.slice(from: 13, upTo: metadataKey.length)
-                                let royaltyAddress = UFC_NFT.resolve(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
-                                let royaltyReceiver: PublicPath = PublicPath(identifier: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
-                                let royaltyCut = UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
-                                let cutValue: UFix64 = UFC_NFT.royaltyCutStringToUFix64(royaltyCut)
+                                let royaltyAddress = RogueBunnies_NFT.resolve(RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
+                                let royaltyReceiver: PublicPath = PublicPath(identifier: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
+                                let royaltyCut = RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
+                                let cutValue: UFix64 = RogueBunnies_NFT.royaltyCutStringToUFix64(royaltyCut)
                                 royalties.append(MetadataViews.Royalty(
                                     receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
                                     cut: cutValue,
-                                    description: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
+                                    description: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
                                 )
                                 )
                             }
@@ -407,14 +407,14 @@ pub contract UFC_NFT: NonFungibleToken {
                     return MetadataViews.Royalties(cutInfos: royalties)
                 case Type<MetadataViews.NFTCollectionData>():
                     return MetadataViews.NFTCollectionData(
-                        storagePath: UFC_NFT.CollectionStoragePath,
-                        publicPath: UFC_NFT.CollectionPublicPath,
-                        providerPath: /private/UFC_NFT,
-                        publicCollection: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic}>(),
-                        publicLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
-                        providerLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        storagePath: RogueBunnies_NFT.CollectionStoragePath,
+                        publicPath: RogueBunnies_NFT.CollectionPublicPath,
+                        providerPath: /private/RogueBunnies_NFT,
+                        publicCollection: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic}>(),
+                        publicLinkedType: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
                         createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
-                            return <-UFC_NFT.createEmptyCollection()
+                            return <-RogueBunnies_NFT.createEmptyCollection()
                         })
                     )
                 case Type<MetadataViews.NFTCollectionDisplay>():
@@ -431,9 +431,9 @@ pub contract UFC_NFT: NonFungibleToken {
                         mediaType: "PLACEHOLDER_FOR_MIME_TYPE"
                     )
                     return MetadataViews.NFTCollectionDisplay(
-                        name: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
-                        description: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
-                        externalURL: MetadataViews.ExternalURL(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
+                        name: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        externalURL: MetadataViews.ExternalURL(RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
                         squareImage: squareImage,
                         bannerImage: bannerImage,
                         socials: {
@@ -445,11 +445,11 @@ pub contract UFC_NFT: NonFungibleToken {
                     // We only have a legacy {String: String} dictionary to store trait information.
                     // There may be multiple traits defined per NFT. Pull trait information
                     // based on keys that have the "trait_" prefix in the dictionary.
-                    for metadataKey in UFC_NFT.getSetMetadata(setId: self.setId)!.keys {
+                    for metadataKey in RogueBunnies_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 6 chars, which is the length of "trait_" key
                         if metadataKey.length >= 6 {
                             if metadataKey.slice(from: 0, upTo: 6) == "trait_" {
-                                traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), UFC_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
+                                traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), RogueBunnies_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
                             }
                         }
                     }
@@ -460,7 +460,7 @@ pub contract UFC_NFT: NonFungibleToken {
 
         // If the NFT is destroyed, emit an event
         destroy() {
-            UFC_NFT.totalSupply = UFC_NFT.totalSupply - (1 as UInt64)
+            RogueBunnies_NFT.totalSupply = RogueBunnies_NFT.totalSupply - (1 as UInt64)
             emit NFTDestroyed(id: self.id)
         }
     }
@@ -473,7 +473,7 @@ pub contract UFC_NFT: NonFungibleToken {
 
         pub fun addSeries(seriesId: UInt32, metadata: {String: String}) {
             pre {
-                UFC_NFT.series[seriesId] == nil:
+                RogueBunnies_NFT.series[seriesId] == nil:
                     "Cannot add Series: The Series already exists"
             }
 
@@ -484,17 +484,17 @@ pub contract UFC_NFT: NonFungibleToken {
             )
 
             // Add the new Series resource to the Series dictionary in the contract
-            UFC_NFT.series[seriesId] <-! newSeries
+            RogueBunnies_NFT.series[seriesId] <-! newSeries
         }
 
         pub fun borrowSeries(seriesId: UInt32): &Series  {
             pre {
-                UFC_NFT.series[seriesId] != nil:
+                RogueBunnies_NFT.series[seriesId] != nil:
                     "Cannot borrow Series: The Series does not exist"
             }
 
             // Get a reference to the Series and return it
-            return (&UFC_NFT.series[seriesId] as &Series?)!
+            return (&RogueBunnies_NFT.series[seriesId] as &Series?)!
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -504,27 +504,27 @@ pub contract UFC_NFT: NonFungibleToken {
     }
 
     // This is the interface that users can cast their NFT Collection as
-    // to allow others to deposit UFC_NFT into their Collection. It also allows for reading
-    // the details of UFC_NFT in the Collection.
-    pub resource interface UFC_NFTCollectionPublic {
+    // to allow others to deposit RogueBunnies_NFT into their Collection. It also allows for reading
+    // the details of RogueBunnies_NFT in the Collection.
+    pub resource interface RogueBunnies_NFTCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowUFC_NFT(id: UInt64): &UFC_NFT.NFT? {
+        pub fun borrowRogueBunnies_NFT(id: UInt64): &RogueBunnies_NFT.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id):
-                    "Cannot borrow UFC_NFT reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow RogueBunnies_NFT reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
     // Collection
-    // A collection of UFC_NFT NFTs owned by an account
+    // A collection of RogueBunnies_NFT NFTs owned by an account
     //
-    pub resource Collection: UFC_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    pub resource Collection: RogueBunnies_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
         //
@@ -566,7 +566,7 @@ pub contract UFC_NFT: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @UFC_NFT.NFT
+            let token <- token as! @RogueBunnies_NFT.NFT
 
             let id: UInt64 = token.id
 
@@ -609,14 +609,14 @@ pub contract UFC_NFT: NonFungibleToken {
             return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
-        // borrowUFC_NFT
-        // Gets a reference to an NFT in the collection as a UFC_NFT,
+        // borrowRogueBunnies_NFT
+        // Gets a reference to an NFT in the collection as a RogueBunnies_NFT,
         // exposing all of its fields.
-        // This is safe as there are no functions that can be called on the UFC_NFT.
+        // This is safe as there are no functions that can be called on the RogueBunnies_NFT.
         //
-        pub fun borrowUFC_NFT(id: UInt64): &UFC_NFT.NFT? {
+        pub fun borrowRogueBunnies_NFT(id: UInt64): &RogueBunnies_NFT.NFT? {
             let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
-            return ref as! &UFC_NFT.NFT?
+            return ref as! &RogueBunnies_NFT.NFT?
         }
 
         // borrowViewResolver
@@ -625,8 +625,8 @@ pub contract UFC_NFT: NonFungibleToken {
         //
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-            let UFC_NFTNft = nft as! &UFC_NFT.NFT
-            return UFC_NFTNft as &AnyResource{MetadataViews.Resolver}
+            let RogueBunnies_NFTNft = nft as! &RogueBunnies_NFT.NFT
+            return RogueBunnies_NFTNft as &AnyResource{MetadataViews.Resolver}
         }
 
         // destructor
@@ -649,33 +649,33 @@ pub contract UFC_NFT: NonFungibleToken {
     }
 
     // fetch
-    // Get a reference to a UFC_NFT from an account's Collection, if available.
-    // If an account does not have a UFC_NFT.Collection, panic.
+    // Get a reference to a RogueBunnies_NFT from an account's Collection, if available.
+    // If an account does not have a RogueBunnies_NFT.Collection, panic.
     // If it has a collection but does not contain the Id, return nil.
     // If it has a collection and that collection contains the Id, return a reference to that.
     //
-    pub fun fetch(_ from: Address, id: UInt64): &UFC_NFT.NFT? {
+    pub fun fetch(_ from: Address, id: UInt64): &RogueBunnies_NFT.NFT? {
         let collection = getAccount(from)
-            .getCapability(UFC_NFT.CollectionPublicPath)
-            .borrow<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic}>()
+            .getCapability(RogueBunnies_NFT.CollectionPublicPath)
+            .borrow<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic}>()
             ?? panic("Couldn't get collection")
-        // We trust UFC_NFT.Collection.borrowUFC_NFT to get the correct id
+        // We trust RogueBunnies_NFT.Collection.borrowRogueBunnies_NFT to get the correct id
         // (it checks it before returning it).
-        return collection.borrowUFC_NFT(id: id)
+        return collection.borrowRogueBunnies_NFT(id: id)
     }
 
     // getAllSeries returns all the sets
     //
     // Returns: An array of all the series that have been created
-    pub fun getAllSeries(): [UFC_NFT.SeriesData] {
-        return UFC_NFT.seriesData.values
+    pub fun getAllSeries(): [RogueBunnies_NFT.SeriesData] {
+        return RogueBunnies_NFT.seriesData.values
     }
 
     // getAllSets returns all the sets
     //
     // Returns: An array of all the sets that have been created
-    pub fun getAllSets(): [UFC_NFT.NFTSetData] {
-        return UFC_NFT.setData.values
+    pub fun getAllSets(): [RogueBunnies_NFT.NFTSetData] {
+        return RogueBunnies_NFT.setData.values
     }
 
     // getSeriesMetadata returns the metadata that the specified Series
@@ -685,7 +685,7 @@ pub contract UFC_NFT: NonFungibleToken {
     //
     // Returns: The metadata as a String to String mapping optional
     pub fun getSeriesMetadata(seriesId: UInt32): {String: String}? {
-        return UFC_NFT.seriesData[seriesId]?.getMetadata()
+        return RogueBunnies_NFT.seriesData[seriesId]?.getMetadata()
     }
 
     // getSetMaxEditions returns the the maximum number of NFT editions that can
@@ -695,7 +695,7 @@ pub contract UFC_NFT: NonFungibleToken {
     //
     // Returns: The max number of NFT editions in this Set
     pub fun getSetMaxEditions(setId: UInt32): UInt32? {
-        return UFC_NFT.setData[setId]?.maxEditions
+        return RogueBunnies_NFT.setData[setId]?.maxEditions
     }
 
     // getSetMetadata returns all the metadata associated with a specific Set
@@ -704,7 +704,7 @@ pub contract UFC_NFT: NonFungibleToken {
     //
     // Returns: The metadata as a String to String mapping optional
     pub fun getSetMetadata(setId: UInt32): {String: String}? {
-        return UFC_NFT.setData[setId]?.getMetadata()
+        return RogueBunnies_NFT.setData[setId]?.getMetadata()
     }
 
     // getSetSeriesId returns the Series Id the Set belongs to
@@ -713,7 +713,7 @@ pub contract UFC_NFT: NonFungibleToken {
     //
     // Returns: The Series Id
     pub fun getSetSeriesId(setId: UInt32): UInt32? {
-        return UFC_NFT.setData[setId]?.seriesId
+        return RogueBunnies_NFT.setData[setId]?.seriesId
     }
 
     // getSetMetadata returns all the ipfs hashes for each nft 
@@ -724,7 +724,7 @@ pub contract UFC_NFT: NonFungibleToken {
     // Returns: The ipfs hashes of nft editions as a Array of Strings
     pub fun getIpfsMetadataHashByNftEdition(setId: UInt32, editionNum: UInt32): String? {
         // Don't force a revert if the setId or field is invalid
-        if let set = UFC_NFT.setData[setId] {
+        if let set = RogueBunnies_NFT.setData[setId] {
             return set.getIpfsMetadataHash(editionNum: editionNum)
         } else {
             return nil
@@ -740,7 +740,7 @@ pub contract UFC_NFT: NonFungibleToken {
     // Returns: The metadata field as a String Optional
     pub fun getSetMetadataByField(setId: UInt32, field: String): String? {
         // Don't force a revert if the setId or field is invalid
-        if let set = UFC_NFT.setData[setId] {
+        if let set = RogueBunnies_NFT.setData[setId] {
             return set.getMetadataField(field: field)
         } else {
             return nil
@@ -803,10 +803,10 @@ pub contract UFC_NFT: NonFungibleToken {
     //
 	init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/UFC_NFTCollection
-        self.CollectionPublicPath = /public/UFC_NFTCollection
-        self.AdminStoragePath = /storage/UFC_NFTAdmin
-        self.AdminPrivatePath = /private/UFC_NFTAdminUpgrade
+        self.CollectionStoragePath = /storage/RogueBunnies_NFTCollection
+        self.CollectionPublicPath = /public/RogueBunnies_NFTCollection
+        self.AdminStoragePath = /storage/RogueBunnies_NFTAdmin
+        self.AdminPrivatePath = /private/RogueBunnies_NFTAdminUpgrade
 
         // Initialize the total supply
         self.totalSupply = 0
@@ -818,7 +818,7 @@ pub contract UFC_NFT: NonFungibleToken {
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
 
-        self.account.link<&UFC_NFT.Admin>(
+        self.account.link<&RogueBunnies_NFT.Admin>(
             self.AdminPrivatePath,
             target: self.AdminStoragePath
         ) ?? panic("Could not get a capability to the admin")
