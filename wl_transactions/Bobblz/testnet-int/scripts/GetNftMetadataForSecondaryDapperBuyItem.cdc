@@ -21,7 +21,7 @@ pub struct PurchaseData {
     }
 }
 
-pub fun main(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64): PurchaseData {
+pub fun main(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64): PurchaseData {
     let acct = getAccount(storefrontAddress)
 
     // Get the storefront reference from the seller

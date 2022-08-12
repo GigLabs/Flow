@@ -4,7 +4,7 @@ import drewdapper_NFT from 0xf3e8f8ae2e9e2fec
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
-transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
+transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let drewdapper_NFTCollection: &drewdapper_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}

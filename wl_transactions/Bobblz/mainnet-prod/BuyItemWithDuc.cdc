@@ -4,7 +4,7 @@ import Bobblz_NFT from 0xd45e2bd9a3d5003b
 import DapperUtilityCoin from 0xead892083b3e2c6c
 import NFTStorefront from 0x4eb8a10cb9f87357
 
-transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
+transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let Bobblz_NFTCollection: &Bobblz_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}

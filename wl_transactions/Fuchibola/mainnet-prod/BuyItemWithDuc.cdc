@@ -4,7 +4,7 @@ import Fuchibola_NFT from 0xf3ee684cd0259fed
 import DapperUtilityCoin from 0xead892083b3e2c6c
 import NFTStorefront from 0x4eb8a10cb9f87357
 
-transaction(listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
+transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let Fuchibola_NFTCollection: &Fuchibola_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
