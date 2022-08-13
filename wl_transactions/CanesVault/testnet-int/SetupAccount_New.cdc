@@ -1,0 +1,43 @@
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import Canes_Vault_Int_NFT from 0x04625c28593d9408
+import MetadataViews from 0x9b053ed2bd3e7339
+
+// This transaction installs the Canes_Vault_Int_NFT collection so an
+// account can receive Canes_Vault_Int_NFT NFTs 
+
+transaction() {
+    prepare(signer: AuthAccount) {
+
+        // If the account doesn't already have a collection
+        if signer.borrow<&Canes_Vault_Int_NFT.Collection>(from: Canes_Vault_Int_NFT.CollectionStoragePath) == nil {
+
+            // Create a new empty collection and save it to the account
+            signer.save(<-Canes_Vault_Int_NFT.createEmptyCollection(), to: Canes_Vault_Int_NFT.CollectionStoragePath)
+
+            // Create a public capability to the Canes_Vault_Int_NFT collection
+            // that exposes the Collection interface, which now includes
+            // the Metadata Resolver to expose Metadata Standard views
+            signer.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+                Canes_Vault_Int_NFT.CollectionPublicPath,
+                target: Canes_Vault_Int_NFT.CollectionStoragePath
+            )
+        }
+        // If the account already has a Canes_Vault_Int_NFT collection, but has not yet exposed the 
+        // Metadata Resolver interface for the Metadata Standard views
+        else if !signer.getCapability<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>
+            (Canes_Vault_Int_NFT.CollectionPublicPath)!.check() { 
+
+            // Unlink the current capability exposing the Canes_Vault_Int_NFT collection,
+            // as it needs to be replaced with an updated capability
+            signer.unlink(Canes_Vault_Int_NFT.CollectionPublicPath)
+
+            // Create the new public capability to the Canes_Vault_Int_NFT collection
+            // that exposes the Collection interface, which now includes
+            // the Metadata Resolver to expose Metadata Standard views
+            signer.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+                Canes_Vault_Int_NFT.CollectionPublicPath,
+                target: Canes_Vault_Int_NFT.CollectionStoragePath
+            )
+        }
+    }
+}
