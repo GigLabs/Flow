@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import GigLabsQA_NFT from 0x18445fd03b683069
-import MetadataViews from 0x9b053ed2bd3e7339
+import MetadataViews from 0x631e88ae7f1d7c20
 
 // This transaction installs the GigLabsQA_NFT collection so an
 // account can receive GigLabsQA_NFT NFTs 

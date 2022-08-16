@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x1d7e57aa55817448
 import Bobblz_NFT from 0xd45e2bd9a3d5003b
-import MetadataViews from 0x8f9bd747571ebdf4
+import MetadataViews from 0x1d7e57aa55817448
 
 // This transaction installs the Bobblz_NFT collection so an
 // account can receive Bobblz_NFT NFTs 

@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x1d7e57aa55817448
 import Birdieland_NFT from 0x59e3d094592231a7
-import MetadataViews from 0x8f9bd747571ebdf4
+import MetadataViews from 0x1d7e57aa55817448
 
 // This transaction installs the Birdieland_NFT collection so an
 // account can receive Birdieland_NFT NFTs 

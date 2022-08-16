@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x1d7e57aa55817448
 import RogueBunnies_NFT from 0x396646f110afb2e6
-import MetadataViews from 0x8f9bd747571ebdf4
+import MetadataViews from 0x1d7e57aa55817448
 
 // This transaction installs the RogueBunnies_NFT collection so an
 // account can receive RogueBunnies_NFT NFTs 

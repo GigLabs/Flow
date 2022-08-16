@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x1d7e57aa55817448
 import RaceDay_NFT from 0x329feb3ab062d289
-import MetadataViews from 0x8f9bd747571ebdf4
+import MetadataViews from 0x1d7e57aa55817448
 
 // This transaction installs the RaceDay_NFT collection so an
 // account can receive RaceDay_NFT NFTs 

@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x1d7e57aa55817448
 import NBA_NFT from 0x54317f5ad2f47ad3
-import MetadataViews from 0x8f9bd747571ebdf4
+import MetadataViews from 0x1d7e57aa55817448
 
 // This transaction installs the NBA_NFT collection so an
 // account can receive NBA_NFT NFTs 

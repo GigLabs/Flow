@@ -1,6 +1,6 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import breakingt_NFT from 0x04625c28593d9408
-import MetadataViews from 0x9b053ed2bd3e7339
+import MetadataViews from 0x631e88ae7f1d7c20
 
 // This transaction installs the breakingt_NFT collection so an
 // account can receive breakingt_NFT NFTs 
