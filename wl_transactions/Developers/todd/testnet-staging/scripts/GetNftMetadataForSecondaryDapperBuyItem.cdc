@@ -2,7 +2,7 @@
 // Get metadata for a single NFT in a owner's collection
 // needed to display the NFT in dapper wallet
 // during the secondary purchase of an NFT
-import ToddDapper_NFT from 0xf3e8f8ae2e9e2fec
+import ToddDapper_NFT from 0x074bae238bc6b419
 import NFTStorefront from 0x94b06cfca1d8a476
 
 pub struct PurchaseData {
