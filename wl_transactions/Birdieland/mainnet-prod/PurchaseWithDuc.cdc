@@ -2,6 +2,7 @@ import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import DapperUtilityCoin from 0xead892083b3e2c6c
 import Birdieland_NFT from 0x59e3d094592231a7
+import MetadataViews from 0x1d7e57aa55817448
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
@@ -14,11 +15,30 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
     if buyer.borrow<&Birdieland_NFT.Collection>(from: Birdieland_NFT.CollectionStoragePath) == nil {
+
         // Create a new empty collection and save it to the account
         buyer.save(<-Birdieland_NFT.createEmptyCollection(), to: Birdieland_NFT.CollectionStoragePath)
+
         // Create a public capability to the Birdieland_NFT collection
-        // that exposes the Collection interface
-        buyer.link<&Birdieland_NFT.Collection{NonFungibleToken.CollectionPublic,Birdieland_NFT.Birdieland_NFTCollectionPublic}>(
+        // that exposes the Collection interface, which now includes
+        // the Metadata Resolver to expose Metadata Standard views
+        buyer.link<&Birdieland_NFT.Collection{NonFungibleToken.CollectionPublic,Birdieland_NFT.Birdieland_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            Birdieland_NFT.CollectionPublicPath,
+            target: Birdieland_NFT.CollectionStoragePath
+        )
+    }
+    // If the account already has a Birdieland_NFT collection, but has not yet exposed the 
+    // Metadata Resolver interface for the Metadata Standard views
+    else if (signer.getCapability<&Birdieland_NFT.Collection{NonFungibleToken.CollectionPublic,Birdieland_NFT.Birdieland_NFTCollectionPublic,MetadataViews.ResolverCollection}>(Birdieland_NFT.CollectionPublicPath).borrow() == nil) {
+
+        // Unlink the current capability exposing the Birdieland_NFT collection,
+        // as it needs to be replaced with an updated capability
+        buyer.unlink(Birdieland_NFT.CollectionPublicPath)
+
+        // Create the new public capability to the Birdieland_NFT collection
+        // that exposes the Collection interface, which now includes
+        // the Metadata Resolver to expose Metadata Standard views
+        buyer.link<&Birdieland_NFT.Collection{NonFungibleToken.CollectionPublic,Birdieland_NFT.Birdieland_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
             Birdieland_NFT.CollectionPublicPath,
             target: Birdieland_NFT.CollectionStoragePath
         )

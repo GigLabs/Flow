@@ -2,6 +2,7 @@ import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import bobblz_NFT from 0x04625c28593d9408
+import MetadataViews from 0x631e88ae7f1d7c20
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
@@ -16,11 +17,30 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
     if buyer.borrow<&bobblz_NFT.Collection>(from: bobblz_NFT.CollectionStoragePath) == nil {
+
         // Create a new empty collection and save it to the account
         buyer.save(<-bobblz_NFT.createEmptyCollection(), to: bobblz_NFT.CollectionStoragePath)
+
         // Create a public capability to the bobblz_NFT collection
-        // that exposes the Collection interface
-        buyer.link<&bobblz_NFT.Collection{NonFungibleToken.CollectionPublic,bobblz_NFT.bobblz_NFTCollectionPublic}>(
+        // that exposes the Collection interface, which now includes
+        // the Metadata Resolver to expose Metadata Standard views
+        buyer.link<&bobblz_NFT.Collection{NonFungibleToken.CollectionPublic,bobblz_NFT.bobblz_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            bobblz_NFT.CollectionPublicPath,
+            target: bobblz_NFT.CollectionStoragePath
+        )
+    }
+    // If the account already has a bobblz_NFT collection, but has not yet exposed the 
+    // Metadata Resolver interface for the Metadata Standard views
+    else if (signer.getCapability<&bobblz_NFT.Collection{NonFungibleToken.CollectionPublic,bobblz_NFT.bobblz_NFTCollectionPublic,MetadataViews.ResolverCollection}>(bobblz_NFT.CollectionPublicPath).borrow() == nil) {
+
+        // Unlink the current capability exposing the bobblz_NFT collection,
+        // as it needs to be replaced with an updated capability
+        buyer.unlink(bobblz_NFT.CollectionPublicPath)
+
+        // Create the new public capability to the bobblz_NFT collection
+        // that exposes the Collection interface, which now includes
+        // the Metadata Resolver to expose Metadata Standard views
+        buyer.link<&bobblz_NFT.Collection{NonFungibleToken.CollectionPublic,bobblz_NFT.bobblz_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
             bobblz_NFT.CollectionPublicPath,
             target: bobblz_NFT.CollectionStoragePath
         )
