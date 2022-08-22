@@ -17,14 +17,14 @@ transaction() {
             // Create a public capability to the NBA_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&NBA_NFT.Collection{NonFungibleToken.CollectionPublic,NBA_NFT.NBA_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 NBA_NFT.CollectionPublicPath,
                 target: NBA_NFT.CollectionStoragePath
             )
         }
         // If the account already has a NBA_NFT collection, but has not yet exposed the 
         // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&NBA_NFT.Collection{NonFungibleToken.CollectionPublic,NBA_NFT.NBA_NFTCollectionPublic,MetadataViews.ResolverCollection}>(NBA_NFT.CollectionPublicPath).borrow() == nil) {
+        else if (signer.getCapability<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(NBA_NFT.CollectionPublicPath).borrow() == nil) {
 
             // Unlink the current capability exposing the NBA_NFT collection,
             // as it needs to be replaced with an updated capability
@@ -33,7 +33,7 @@ transaction() {
             // Create the new public capability to the NBA_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&NBA_NFT.Collection{NonFungibleToken.CollectionPublic,NBA_NFT.NBA_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 NBA_NFT.CollectionPublicPath,
                 target: NBA_NFT.CollectionStoragePath
             )

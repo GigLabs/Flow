@@ -24,14 +24,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the Andbox_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&Andbox_NFT.Collection{NonFungibleToken.CollectionPublic,Andbox_NFT.Andbox_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&Andbox_NFT.Collection{Andbox_NFT.Andbox_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             Andbox_NFT.CollectionPublicPath,
             target: Andbox_NFT.CollectionStoragePath
         )
     }
     // If the account already has a Andbox_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&Andbox_NFT.Collection{NonFungibleToken.CollectionPublic,Andbox_NFT.Andbox_NFTCollectionPublic,MetadataViews.ResolverCollection}>(Andbox_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&Andbox_NFT.Collection{Andbox_NFT.Andbox_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(Andbox_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the Andbox_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -40,7 +40,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the Andbox_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&Andbox_NFT.Collection{NonFungibleToken.CollectionPublic,Andbox_NFT.Andbox_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&Andbox_NFT.Collection{Andbox_NFT.Andbox_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             Andbox_NFT.CollectionPublicPath,
             target: Andbox_NFT.CollectionStoragePath
         )

@@ -17,14 +17,14 @@ transaction() {
             // Create a public capability to the nflInt_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&nflInt_NFT.Collection{NonFungibleToken.CollectionPublic,nflInt_NFT.nflInt_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&nflInt_NFT.Collection{nflInt_NFT.nflInt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 nflInt_NFT.CollectionPublicPath,
                 target: nflInt_NFT.CollectionStoragePath
             )
         }
         // If the account already has a nflInt_NFT collection, but has not yet exposed the 
         // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&nflInt_NFT.Collection{NonFungibleToken.CollectionPublic,nflInt_NFT.nflInt_NFTCollectionPublic,MetadataViews.ResolverCollection}>(nflInt_NFT.CollectionPublicPath).borrow() == nil) {
+        else if (signer.getCapability<&nflInt_NFT.Collection{nflInt_NFT.nflInt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(nflInt_NFT.CollectionPublicPath).borrow() == nil) {
 
             // Unlink the current capability exposing the nflInt_NFT collection,
             // as it needs to be replaced with an updated capability
@@ -33,7 +33,7 @@ transaction() {
             // Create the new public capability to the nflInt_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&nflInt_NFT.Collection{NonFungibleToken.CollectionPublic,nflInt_NFT.nflInt_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&nflInt_NFT.Collection{nflInt_NFT.nflInt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 nflInt_NFT.CollectionPublicPath,
                 target: nflInt_NFT.CollectionStoragePath
             )

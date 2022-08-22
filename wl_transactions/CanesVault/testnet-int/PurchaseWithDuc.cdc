@@ -22,14 +22,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the Canes_Vault_Int_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&Canes_Vault_Int_NFT.Collection{Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             Canes_Vault_Int_NFT.CollectionPublicPath,
             target: Canes_Vault_Int_NFT.CollectionStoragePath
         )
     }
     // If the account already has a Canes_Vault_Int_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>(Canes_Vault_Int_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&Canes_Vault_Int_NFT.Collection{Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(Canes_Vault_Int_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the Canes_Vault_Int_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -38,7 +38,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the Canes_Vault_Int_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&Canes_Vault_Int_NFT.Collection{Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             Canes_Vault_Int_NFT.CollectionPublicPath,
             target: Canes_Vault_Int_NFT.CollectionStoragePath
         )

@@ -17,14 +17,14 @@ transaction() {
             // Create a public capability to the DGD_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&DGD_NFT.Collection{NonFungibleToken.CollectionPublic,DGD_NFT.DGD_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 DGD_NFT.CollectionPublicPath,
                 target: DGD_NFT.CollectionStoragePath
             )
         }
         // If the account already has a DGD_NFT collection, but has not yet exposed the 
         // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&DGD_NFT.Collection{NonFungibleToken.CollectionPublic,DGD_NFT.DGD_NFTCollectionPublic,MetadataViews.ResolverCollection}>(DGD_NFT.CollectionPublicPath).borrow() == nil) {
+        else if (signer.getCapability<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(DGD_NFT.CollectionPublicPath).borrow() == nil) {
 
             // Unlink the current capability exposing the DGD_NFT collection,
             // as it needs to be replaced with an updated capability
@@ -33,7 +33,7 @@ transaction() {
             // Create the new public capability to the DGD_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&DGD_NFT.Collection{NonFungibleToken.CollectionPublic,DGD_NFT.DGD_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 DGD_NFT.CollectionPublicPath,
                 target: DGD_NFT.CollectionStoragePath
             )

@@ -17,14 +17,14 @@ transaction() {
             // Create a public capability to the FriendsOfFlow_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&FriendsOfFlow_NFT.Collection{NonFungibleToken.CollectionPublic,FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&FriendsOfFlow_NFT.Collection{FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 FriendsOfFlow_NFT.CollectionPublicPath,
                 target: FriendsOfFlow_NFT.CollectionStoragePath
             )
         }
         // If the account already has a FriendsOfFlow_NFT collection, but has not yet exposed the 
         // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&FriendsOfFlow_NFT.Collection{NonFungibleToken.CollectionPublic,FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,MetadataViews.ResolverCollection}>(FriendsOfFlow_NFT.CollectionPublicPath).borrow() == nil) {
+        else if (signer.getCapability<&FriendsOfFlow_NFT.Collection{FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(FriendsOfFlow_NFT.CollectionPublicPath).borrow() == nil) {
 
             // Unlink the current capability exposing the FriendsOfFlow_NFT collection,
             // as it needs to be replaced with an updated capability
@@ -33,7 +33,7 @@ transaction() {
             // Create the new public capability to the FriendsOfFlow_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&FriendsOfFlow_NFT.Collection{NonFungibleToken.CollectionPublic,FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&FriendsOfFlow_NFT.Collection{FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 FriendsOfFlow_NFT.CollectionPublicPath,
                 target: FriendsOfFlow_NFT.CollectionStoragePath
             )

@@ -17,14 +17,14 @@ transaction() {
             // Create a public capability to the NFL_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&NFL_NFT.Collection{NonFungibleToken.CollectionPublic,NFL_NFT.NFL_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&NFL_NFT.Collection{NFL_NFT.NFL_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 NFL_NFT.CollectionPublicPath,
                 target: NFL_NFT.CollectionStoragePath
             )
         }
         // If the account already has a NFL_NFT collection, but has not yet exposed the 
         // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&NFL_NFT.Collection{NonFungibleToken.CollectionPublic,NFL_NFT.NFL_NFTCollectionPublic,MetadataViews.ResolverCollection}>(NFL_NFT.CollectionPublicPath).borrow() == nil) {
+        else if (signer.getCapability<&NFL_NFT.Collection{NFL_NFT.NFL_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(NFL_NFT.CollectionPublicPath).borrow() == nil) {
 
             // Unlink the current capability exposing the NFL_NFT collection,
             // as it needs to be replaced with an updated capability
@@ -33,7 +33,7 @@ transaction() {
             // Create the new public capability to the NFL_NFT collection
             // that exposes the Collection interface, which now includes
             // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&NFL_NFT.Collection{NonFungibleToken.CollectionPublic,NFL_NFT.NFL_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+            signer.link<&NFL_NFT.Collection{NFL_NFT.NFL_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
                 NFL_NFT.CollectionPublicPath,
                 target: NFL_NFT.CollectionStoragePath
             )

@@ -24,14 +24,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the costacos123_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&costacos123_NFT.Collection{NonFungibleToken.CollectionPublic,costacos123_NFT.costacos123_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             costacos123_NFT.CollectionPublicPath,
             target: costacos123_NFT.CollectionStoragePath
         )
     }
     // If the account already has a costacos123_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&costacos123_NFT.Collection{NonFungibleToken.CollectionPublic,costacos123_NFT.costacos123_NFTCollectionPublic,MetadataViews.ResolverCollection}>(costacos123_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(costacos123_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the costacos123_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -40,7 +40,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the costacos123_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&costacos123_NFT.Collection{NonFungibleToken.CollectionPublic,costacos123_NFT.costacos123_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             costacos123_NFT.CollectionPublicPath,
             target: costacos123_NFT.CollectionStoragePath
         )

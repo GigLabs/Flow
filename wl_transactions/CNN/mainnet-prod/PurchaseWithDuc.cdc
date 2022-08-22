@@ -22,14 +22,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the CNN_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&CNN_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_NFT.CNN_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&CNN_NFT.Collection{CNN_NFT.CNN_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             CNN_NFT.CollectionPublicPath,
             target: CNN_NFT.CollectionStoragePath
         )
     }
     // If the account already has a CNN_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&CNN_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_NFT.CNN_NFTCollectionPublic,MetadataViews.ResolverCollection}>(CNN_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&CNN_NFT.Collection{CNN_NFT.CNN_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(CNN_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the CNN_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -38,7 +38,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the CNN_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&CNN_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_NFT.CNN_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&CNN_NFT.Collection{CNN_NFT.CNN_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             CNN_NFT.CollectionPublicPath,
             target: CNN_NFT.CollectionStoragePath
         )

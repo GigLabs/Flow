@@ -22,14 +22,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the BreakingT_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&BreakingT_NFT.Collection{NonFungibleToken.CollectionPublic,BreakingT_NFT.BreakingT_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             BreakingT_NFT.CollectionPublicPath,
             target: BreakingT_NFT.CollectionStoragePath
         )
     }
     // If the account already has a BreakingT_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&BreakingT_NFT.Collection{NonFungibleToken.CollectionPublic,BreakingT_NFT.BreakingT_NFTCollectionPublic,MetadataViews.ResolverCollection}>(BreakingT_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(BreakingT_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the BreakingT_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -38,7 +38,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the BreakingT_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&BreakingT_NFT.Collection{NonFungibleToken.CollectionPublic,BreakingT_NFT.BreakingT_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             BreakingT_NFT.CollectionPublicPath,
             target: BreakingT_NFT.CollectionStoragePath
         )

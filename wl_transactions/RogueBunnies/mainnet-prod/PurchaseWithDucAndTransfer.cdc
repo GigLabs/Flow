@@ -24,14 +24,14 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create a public capability to the RogueBunnies_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&RogueBunnies_NFT.Collection{NonFungibleToken.CollectionPublic,RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             RogueBunnies_NFT.CollectionPublicPath,
             target: RogueBunnies_NFT.CollectionStoragePath
         )
     }
     // If the account already has a RogueBunnies_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&RogueBunnies_NFT.Collection{NonFungibleToken.CollectionPublic,RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,MetadataViews.ResolverCollection}>(RogueBunnies_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (signer.getCapability<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(RogueBunnies_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the RogueBunnies_NFT collection,
         // as it needs to be replaced with an updated capability
@@ -40,7 +40,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
         // Create the new public capability to the RogueBunnies_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&RogueBunnies_NFT.Collection{NonFungibleToken.CollectionPublic,RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,MetadataViews.ResolverCollection}>(
+        buyer.link<&RogueBunnies_NFT.Collection{RogueBunnies_NFT.RogueBunnies_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
             RogueBunnies_NFT.CollectionPublicPath,
             target: RogueBunnies_NFT.CollectionStoragePath
         )
