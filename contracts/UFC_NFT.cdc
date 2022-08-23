@@ -141,7 +141,7 @@ pub contract UFC_NFT: NonFungibleToken {
         pub let seriesId: UInt32
 
         // Array of NFTSets that belong to this Series
-        access(self) var setIds: [UInt32]
+        pub var setIds: [UInt32]
 
         // Series sealed state
         pub var seriesSealedState: Bool;
@@ -150,7 +150,7 @@ pub contract UFC_NFT: NonFungibleToken {
         access(self) var setSealedState: {UInt32: Bool};
 
         // Current number of editions minted per Set
-        access(self) var numberEditionsMintedPerSet: {UInt32: UInt32}
+        pub var numberEditionsMintedPerSet: {UInt32: UInt32}
 
         init(
             seriesId: UInt32,
@@ -383,15 +383,16 @@ pub contract UFC_NFT: NonFungibleToken {
                     return MetadataViews.ExternalURL(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
                 case Type<MetadataViews.Royalties>():
                     let royalties: [MetadataViews.Royalty] = []
-                    // We only have a legacy {String: String} dictionary to store royalty information.
+                    // There is only a legacy {String: String} dictionary to store royalty information.
                     // There may be multiple royalty cuts defined per NFT. Pull each royalty
                     // based on keys that have the "royalty_addr_" prefix in the dictionary.
                     for metadataKey in UFC_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
                         if metadataKey.length >= 13 {
                             if metadataKey.slice(from: 0, upTo: 13) == "royalty_addr_" {
+                                // A royalty has been found. Use the suffix from the key for the royalty name.
                                 let royaltyName = metadataKey.slice(from: 13, upTo: metadataKey.length)
-                                let royaltyAddress = UFC_NFT.resolve(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
+                                let royaltyAddress = UFC_NFT.convertStringToAddress(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
                                 let royaltyReceiver: PublicPath = PublicPath(identifier: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
                                 let royaltyCut = UFC_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
                                 let cutValue: UFix64 = UFC_NFT.royaltyCutStringToUFix64(royaltyCut)
@@ -412,7 +413,7 @@ pub contract UFC_NFT: NonFungibleToken {
                         storagePath: UFC_NFT.CollectionStoragePath,
                         publicPath: UFC_NFT.CollectionPublicPath,
                         providerPath: /private/UFC_NFT,
-                        publicCollection: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        publicCollection: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic}>(),
                         publicLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         providerLinkedType: Type<&UFC_NFT.Collection{UFC_NFT.UFC_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
@@ -422,15 +423,15 @@ pub contract UFC_NFT: NonFungibleToken {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let squareImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://PLACEHOLDER_FOR_APP_URL.com/SQUARE_IMAGE_FILE_NAME"
+                            url: "https://media.gigantik.io/UFC_NFT/square.png"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_SQUARE_MIME_TYPE"
+                        mediaType: "image/png"
                     )
                     let bannerImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://PLACEHOLDER_FOR_APP_URL.com/BANNER_IMAGE_FILE_NAME"
+                            url: "https://media.gigantik.io/UFC_NFT/banner.png"
                         ),
-                        mediaType: "PLACEHOLDER_FOR_BANNER_MIME_TYPE"
+                        mediaType: "image/png"
                     )
                     return MetadataViews.NFTCollectionDisplay(
                         name: UFC_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
@@ -438,19 +439,18 @@ pub contract UFC_NFT: NonFungibleToken {
                         externalURL: MetadataViews.ExternalURL(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
                         squareImage: squareImage,
                         bannerImage: bannerImage,
-                        socials: {
-                            // Add socials here
-                        }
+                        socials: {}
                     )
                 case Type<MetadataViews.Traits>():
                     let traitDictionary: {String: AnyStruct} = {}
-                    // We only have a legacy {String: String} dictionary to store trait information.
+                    // There is only a legacy {String: String} dictionary to store trait information.
                     // There may be multiple traits defined per NFT. Pull trait information
                     // based on keys that have the "trait_" prefix in the dictionary.
                     for metadataKey in UFC_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 6 chars, which is the length of "trait_" key
                         if metadataKey.length >= 6 {
                             if metadataKey.slice(from: 0, upTo: 6) == "trait_" {
+                                // A trait has been found. Set the trait name to only the trait key suffix.
                                 traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), UFC_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
                             }
                         }
@@ -749,7 +749,12 @@ pub contract UFC_NFT: NonFungibleToken {
         }
     }
 
-	pub fun resolve(_ input: String): Address? {
+    // stringToAddress Converts a string to a Flow address
+    // 
+    // Parameters: input: The address as a String
+    //
+    // Returns: The flow address as an Address Optional
+	pub fun convertStringToAddress(_ input: String): Address? {
 		var address=input
 		if input.utf8[1] == 120 {
 			address = input.slice(from: 2, upTo: input.length)
@@ -764,6 +769,12 @@ pub contract UFC_NFT: NonFungibleToken {
 		return Address(r)
 	}
 
+    // royaltyCutStringToUFix64 Converts a royalty cut string
+    //        to a UFix64
+    // 
+    // Parameters: royaltyCut: The cut value 0.0 - 1.0 as a String
+    //
+    // Returns: The royalty cut as a UFix64
     pub fun royaltyCutStringToUFix64(_ royaltyCut: String): UFix64 {
         var decimalPos = 0
         if royaltyCut[0] == "." {
