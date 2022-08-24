@@ -31,7 +31,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a costacos123_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(costacos123_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(costacos123_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the costacos123_NFT collection,
         // as it needs to be replaced with an updated capability

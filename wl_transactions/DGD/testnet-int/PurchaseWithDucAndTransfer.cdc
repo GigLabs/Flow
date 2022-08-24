@@ -31,7 +31,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a dgd_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&dgd_NFT.Collection{dgd_NFT.dgd_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(dgd_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&dgd_NFT.Collection{dgd_NFT.dgd_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(dgd_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the dgd_NFT collection,
         // as it needs to be replaced with an updated capability

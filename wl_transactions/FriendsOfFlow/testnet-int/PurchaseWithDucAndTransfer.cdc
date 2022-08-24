@@ -31,7 +31,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a friendsOfFlow_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&friendsOfFlow_NFT.Collection{friendsOfFlow_NFT.friendsOfFlow_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(friendsOfFlow_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&friendsOfFlow_NFT.Collection{friendsOfFlow_NFT.friendsOfFlow_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(friendsOfFlow_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the friendsOfFlow_NFT collection,
         // as it needs to be replaced with an updated capability

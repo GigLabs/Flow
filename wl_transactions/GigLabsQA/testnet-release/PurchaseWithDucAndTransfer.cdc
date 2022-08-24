@@ -31,7 +31,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a GigLabsQA_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&GigLabsQA_NFT.Collection{GigLabsQA_NFT.GigLabsQA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(GigLabsQA_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&GigLabsQA_NFT.Collection{GigLabsQA_NFT.GigLabsQA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(GigLabsQA_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the GigLabsQA_NFT collection,
         // as it needs to be replaced with an updated capability

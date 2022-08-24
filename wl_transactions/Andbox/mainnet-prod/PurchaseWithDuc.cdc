@@ -29,7 +29,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a Andbox_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&Andbox_NFT.Collection{Andbox_NFT.Andbox_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(Andbox_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&Andbox_NFT.Collection{Andbox_NFT.Andbox_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(Andbox_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the Andbox_NFT collection,
         // as it needs to be replaced with an updated capability

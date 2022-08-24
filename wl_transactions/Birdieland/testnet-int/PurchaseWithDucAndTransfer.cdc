@@ -31,7 +31,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a izon_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&izon_NFT.Collection{izon_NFT.izon_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(izon_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&izon_NFT.Collection{izon_NFT.izon_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(izon_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the izon_NFT collection,
         // as it needs to be replaced with an updated capability

@@ -29,7 +29,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a nba_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&nba_NFT.Collection{nba_NFT.nba_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(nba_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&nba_NFT.Collection{nba_NFT.nba_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(nba_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the nba_NFT collection,
         // as it needs to be replaced with an updated capability

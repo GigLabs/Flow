@@ -29,7 +29,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     }
     // If the account already has a drewdapper_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (signer.getCapability<&drewdapper_NFT.Collection{drewdapper_NFT.drewdapper_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(drewdapper_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&drewdapper_NFT.Collection{drewdapper_NFT.drewdapper_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(drewdapper_NFT.CollectionPublicPath).borrow() == nil) {
 
         // Unlink the current capability exposing the drewdapper_NFT collection,
         // as it needs to be replaced with an updated capability
