@@ -1,21 +1,7 @@
-/* 
-    Description: Smart Contract for NBA All-Star Weekend
 
-    This smart contract contains the core functionality for
-    a special relase of NFT for NBA All-Star Weekend.
-
-    The contract manages the data associated with the special
-    release of NFTs.
-
-    The contract has an admin resource that has the power to do 
-    all of the important actions in the contract. 
-
-    It is also important to remember that
-    The Golden State Warriors have won five NBA championships (1956,
-    1975, 2015, 2017 and 2018)
-
-*/
+import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
 
 pub contract NBA_NFT: NonFungibleToken {
 
@@ -53,7 +39,6 @@ pub contract NBA_NFT: NonFungibleToken {
 
     // Emitted when an NFT is destroyed
     pub event NFTDestroyed(id: UInt64)
-
     // Named Paths
     //
     pub let CollectionStoragePath: StoragePath
@@ -75,11 +60,9 @@ pub contract NBA_NFT: NonFungibleToken {
     // Variable size dictionary of Series resources
     access(self) var series: @{UInt32: Series}
 
+
     // An NFTSetData is a Struct that holds metadata associated with
-    // a specific NFT Set for NBA All-Star Weekend. The Struct could hold
-    // data related to a specific NBA Team, or data related to a 
-    // commemorative NFT highlighting the top players in NBA
-    // history. 
+    // a specific NFT Set.
     pub struct NFTSetData {
 
         // Unique ID for the Set
@@ -112,8 +95,6 @@ pub contract NBA_NFT: NonFungibleToken {
             self.maxEditions = maxEditions
             self.metadata = metadata
             self.ipfsMetadataHashes = ipfsMetadataHashes
-
-            emit SetCreated(seriesId: self.seriesId, setId: self.setId)
         }
 
         pub fun getIpfsMetadataHash(editionNum: UInt32): String? {
@@ -129,9 +110,8 @@ pub contract NBA_NFT: NonFungibleToken {
         }
     }
 
-    // A SeriesData is a Struct that that groups metadata for a 
-    // a related group of NFTSets. For example, all NBA Teams could be 
-    // grouped in one Series.
+    // A SeriesData is a struct that groups metadata for a 
+    // a related group of NFTSets.
     pub struct SeriesData {
 
         // Unique ID for the Series
@@ -145,14 +125,13 @@ pub contract NBA_NFT: NonFungibleToken {
             metadata: {String: String}) {
             self.seriesId = seriesId
             self.metadata = metadata
-
-            emit SeriesCreated(seriesId: self.seriesId)
         }
 
         pub fun getMetadata(): {String: String} {
             return self.metadata
         }
     }
+
 
     // A Series is special resource type that contains functions to mint NBA_NFT NFTs, 
     // add NFTSets, update NFTSet and Series metadata, and seal Series.
@@ -162,7 +141,7 @@ pub contract NBA_NFT: NonFungibleToken {
         pub let seriesId: UInt32
 
         // Array of NFTSets that belong to this Series
-        access(self) var setIds: [UInt32]
+        pub var setIds: [UInt32]
 
         // Series sealed state
         pub var seriesSealedState: Bool;
@@ -171,7 +150,7 @@ pub contract NBA_NFT: NonFungibleToken {
         access(self) var setSealedState: {UInt32: Bool};
 
         // Current number of editions minted per Set
-        access(self) var numberEditionsMintedPerSet: {UInt32: UInt32}
+        pub var numberEditionsMintedPerSet: {UInt32: UInt32}
 
         init(
             seriesId: UInt32,
@@ -186,7 +165,9 @@ pub contract NBA_NFT: NonFungibleToken {
             NBA_NFT.seriesData[seriesId] = SeriesData(
                     seriesId: seriesId,
                     metadata: metadata
-            )      
+            )
+
+            emit SeriesCreated(seriesId: seriesId)   
         }
 
         pub fun addNftSet(
@@ -338,7 +319,7 @@ pub contract NBA_NFT: NonFungibleToken {
 
     // A resource that represents the NBA_NFT NFT
     //
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         // The token's ID
         pub let id: UInt64
 
@@ -362,6 +343,121 @@ pub contract NBA_NFT: NonFungibleToken {
             let seriesId = NBA_NFT.getSetSeriesId(setId: setId)!
 
             emit Minted(id: self.id, setId: setId, seriesId: seriesId)
+        }
+
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.Editions>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.Serial>(),
+                Type<MetadataViews.Traits>()
+            ]
+        }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "preview")!
+                        )
+                    )
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(
+                        self.id
+                    )
+                case Type<MetadataViews.Editions>():
+                    let maxEditions = NBA_NFT.setData[self.setId]?.maxEditions ?? 0
+                    let editionInfo = MetadataViews.Edition(name: "Edition", number: UInt64(self.editionNum), max: maxEditions > 0 ? UInt64(maxEditions) : nil)
+                    let editionList: [MetadataViews.Edition] = [editionInfo]
+                    return MetadataViews.Editions(
+                        editionList
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL(NBA_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
+                case Type<MetadataViews.Royalties>():
+                    let royalties: [MetadataViews.Royalty] = []
+                    // There is only a legacy {String: String} dictionary to store royalty information.
+                    // There may be multiple royalty cuts defined per NFT. Pull each royalty
+                    // based on keys that have the "royalty_addr_" prefix in the dictionary.
+                    for metadataKey in NBA_NFT.getSetMetadata(setId: self.setId)!.keys {
+                        // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
+                        if metadataKey.length >= 13 {
+                            if metadataKey.slice(from: 0, upTo: 13) == "royalty_addr_" {
+                                // A royalty has been found. Use the suffix from the key for the royalty name.
+                                let royaltyName = metadataKey.slice(from: 13, upTo: metadataKey.length)
+                                let royaltyAddress = NBA_NFT.convertStringToAddress(NBA_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
+                                let royaltyReceiver: PublicPath = PublicPath(identifier: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
+                                let royaltyCut = NBA_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
+                                let cutValue: UFix64 = NBA_NFT.royaltyCutStringToUFix64(royaltyCut)
+                                if cutValue != 0.0 {
+                                    royalties.append(MetadataViews.Royalty(
+                                        receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
+                                        cut: cutValue,
+                                        description: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
+                                    )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    return MetadataViews.Royalties(cutInfos: royalties)
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: NBA_NFT.CollectionStoragePath,
+                        publicPath: NBA_NFT.CollectionPublicPath,
+                        providerPath: /private/NBA_NFT,
+                        publicCollection: Type<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.CollectionPublic}>(),
+                        publicLinkedType: Type<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&NBA_NFT.Collection{NBA_NFT.NBA_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-NBA_NFT.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let squareImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://media.gigantik.io/NBA_NFT/square.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    let bannerImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://media.gigantik.io/NBA_NFT/banner.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: NBA_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        externalURL: MetadataViews.ExternalURL(NBA_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
+                        squareImage: squareImage,
+                        bannerImage: bannerImage,
+                        socials: {}
+                    )
+                case Type<MetadataViews.Traits>():
+                    let traitDictionary: {String: AnyStruct} = {}
+                    // There is only a legacy {String: String} dictionary to store trait information.
+                    // There may be multiple traits defined per NFT. Pull trait information
+                    // based on keys that have the "trait_" prefix in the dictionary.
+                    for metadataKey in NBA_NFT.getSetMetadata(setId: self.setId)!.keys {
+                        // For efficiency, only check keys that are > 6 chars, which is the length of "trait_" key
+                        if metadataKey.length >= 6 {
+                            if metadataKey.slice(from: 0, upTo: 6) == "trait_" {
+                                // A trait has been found. Set the trait name to only the trait key suffix.
+                                traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), NBA_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
+                            }
+                        }
+                    }
+                    return MetadataViews.dictToTraits(dict: traitDictionary, excludedNames: [])
+            }
+            return nil
         }
 
         // If the NFT is destroyed, emit an event
@@ -400,7 +496,7 @@ pub contract NBA_NFT: NonFungibleToken {
             }
 
             // Get a reference to the Series and return it
-            return &NBA_NFT.series[seriesId] as &Series
+            return (&NBA_NFT.series[seriesId] as &Series?)!
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -430,7 +526,7 @@ pub contract NBA_NFT: NonFungibleToken {
     // Collection
     // A collection of NBA_NFT NFTs owned by an account
     //
-    pub resource Collection: NBA_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: NBA_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
         //
@@ -512,7 +608,7 @@ pub contract NBA_NFT: NonFungibleToken {
         // so that the caller can read its metadata and call its methods
         //
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         // borrowNBA_NFT
@@ -521,12 +617,18 @@ pub contract NBA_NFT: NonFungibleToken {
         // This is safe as there are no functions that can be called on the NBA_NFT.
         //
         pub fun borrowNBA_NFT(id: UInt64): &NBA_NFT.NFT? {
-            if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &NBA_NFT.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &NBA_NFT.NFT?
+        }
+
+        // borrowViewResolver
+        // Gets a reference to the MetadataViews resolver in the collection,
+        // giving access to all metadata information made available.
+        //
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+            let NBA_NFTNft = nft as! &NBA_NFT.NFT
+            return NBA_NFTNft as &AnyResource{MetadataViews.Resolver}
         }
 
         // destructor
@@ -645,6 +747,71 @@ pub contract NBA_NFT: NonFungibleToken {
         } else {
             return nil
         }
+    }
+
+    // stringToAddress Converts a string to a Flow address
+    // 
+    // Parameters: input: The address as a String
+    //
+    // Returns: The flow address as an Address Optional
+	pub fun convertStringToAddress(_ input: String): Address? {
+		var address=input
+		if input.utf8[1] == 120 {
+			address = input.slice(from: 2, upTo: input.length)
+		}
+		var r:UInt64 = 0 
+		var bytes = address.decodeHex()
+
+		while bytes.length>0{
+			r = r  + (UInt64(bytes.removeFirst()) << UInt64(bytes.length * 8 ))
+		}
+
+		return Address(r)
+	}
+
+    // royaltyCutStringToUFix64 Converts a royalty cut string
+    //        to a UFix64
+    // 
+    // Parameters: royaltyCut: The cut value 0.0 - 1.0 as a String
+    //
+    // Returns: The royalty cut as a UFix64
+    pub fun royaltyCutStringToUFix64(_ royaltyCut: String): UFix64 {
+        var decimalPos = 0
+        if royaltyCut[0] == "." {
+            decimalPos = 1
+        } else if royaltyCut[1] == "." {
+            if royaltyCut[0] == "1" {
+                // "1" in the first postiion must be 1.0 i.e. 100% cut
+                return 1.0
+            } else if royaltyCut[0] == "0" {
+                decimalPos = 2
+            }
+        } else {
+            // Invalid royalty value
+            return 0.0
+        }
+
+        var royaltyCutStrLen = royaltyCut.length
+        if royaltyCut.length > (8 + decimalPos) {
+            // UFix64 is capped at 8 digits after the decimal
+            // so truncate excess decimal values from the string
+            royaltyCutStrLen = (8 + decimalPos)
+        }
+        let royaltyCutPercentValue = royaltyCut.slice(from: decimalPos, upTo: royaltyCutStrLen)
+        var bytes = royaltyCutPercentValue.utf8
+        var i = 0
+        var cutValueInteger: UInt64 = 0
+        var cutValueDivisor: UFix64 = 1.0
+        let zeroAsciiIntValue: UInt64 = 48
+        // First convert the string to a non-decimal Integer
+        while i < bytes.length {
+            cutValueInteger = (cutValueInteger * 10) + UInt64(bytes[i]) - zeroAsciiIntValue
+            cutValueDivisor = cutValueDivisor * 10.0
+            i = i + 1
+        }
+
+        // Convert the resulting Integer to a decimal in the range 0.0 - 0.99999999
+        return (UFix64(cutValueInteger) / cutValueDivisor)
     }
 
     // initializer

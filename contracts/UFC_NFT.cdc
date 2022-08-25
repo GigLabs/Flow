@@ -439,7 +439,11 @@ pub contract UFC_NFT: NonFungibleToken {
                         externalURL: MetadataViews.ExternalURL(UFC_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
                         squareImage: squareImage,
                         bannerImage: bannerImage,
-                        socials: {}
+                        socials: {
+                            "discord": MetadataViews.ExternalURL("https://discord.gg/UFCStrike"),
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/UFCStrikeNFT"),
+                            "instagram": MetadataViews.ExternalURL("https://instagram.com/ufcstrike")
+                        }
                     )
                 case Type<MetadataViews.Traits>():
                     let traitDictionary: {String: AnyStruct} = {}

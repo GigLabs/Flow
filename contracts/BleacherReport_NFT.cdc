@@ -3,11 +3,11 @@ import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import MetadataViews from 0x1d7e57aa55817448
 
-pub contract DGD_NFT: NonFungibleToken {
+pub contract BleacherReport_NFT: NonFungibleToken {
 
-    // DGD_NFT Events
+    // BleacherReport_NFT Events
     //
-    // Emitted when the DGD_NFT contract is created
+    // Emitted when the BleacherReport_NFT contract is created
     pub event ContractInitialized()
 
     // Emitted when an NFT is minted
@@ -47,7 +47,7 @@ pub contract DGD_NFT: NonFungibleToken {
     pub let AdminPrivatePath: PrivatePath
 
     // totalSupply
-    // The total number of DGD_NFT that have been minted
+    // The total number of BleacherReport_NFT that have been minted
     //
     pub var totalSupply: UInt64
 
@@ -133,7 +133,7 @@ pub contract DGD_NFT: NonFungibleToken {
     }
 
 
-    // A Series is special resource type that contains functions to mint DGD_NFT NFTs, 
+    // A Series is special resource type that contains functions to mint BleacherReport_NFT NFTs, 
     // add NFTSets, update NFTSet and Series metadata, and seal Series.
 	pub resource Series {
 
@@ -162,7 +162,7 @@ pub contract DGD_NFT: NonFungibleToken {
             self.setIds = []
             self.setSealedState = {}
 
-            DGD_NFT.seriesData[seriesId] = SeriesData(
+            BleacherReport_NFT.seriesData[seriesId] = SeriesData(
                     seriesId: seriesId,
                     metadata: metadata
             )
@@ -195,7 +195,7 @@ pub contract DGD_NFT: NonFungibleToken {
             self.numberEditionsMintedPerSet[setId] = 0
 
             // Store it in the sets mapping field
-            DGD_NFT.setData[setId] = newNFTSet
+            BleacherReport_NFT.setData[setId] = newNFTSet
 
             emit SetCreated(seriesId: self.seriesId, setId: setId)
         }
@@ -215,7 +215,7 @@ pub contract DGD_NFT: NonFungibleToken {
                     metadata: metadata
             )  
             // Store updated Series in the Series mapping field
-            DGD_NFT.seriesData[self.seriesId] = newSeriesMetadata
+            BleacherReport_NFT.seriesData[self.seriesId] = newSeriesMetadata
 
             emit SeriesMetadataUpdated(seriesId: self.seriesId)
         }
@@ -243,23 +243,23 @@ pub contract DGD_NFT: NonFungibleToken {
                 metadata: metadata
             )
             // Store updated Set in the Sets mapping field
-            DGD_NFT.setData[setId] = newSetMetadata
+            BleacherReport_NFT.setData[setId] = newSetMetadata
 
             emit SetMetadataUpdated(seriesId: self.seriesId, setId: setId)
         }
 
-		// mintDGD_NFT
+		// mintBleacherReport_NFT
         // Mints a new NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
         //
-	    pub fun mintDGD_NFT(
+	    pub fun mintBleacherReport_NFT(
             recipient: &{NonFungibleToken.CollectionPublic},
             tokenId: UInt64,
             setId: UInt32) {
             
             pre {
                 self.numberEditionsMintedPerSet[setId] != nil: "The Set does not exist."
-                self.numberEditionsMintedPerSet[setId]! <= DGD_NFT.getSetMaxEditions(setId: setId)!:
+                self.numberEditionsMintedPerSet[setId]! <= BleacherReport_NFT.getSetMaxEditions(setId: setId)!:
                     "Set has reached maximum NFT edition capacity."
             }
 
@@ -268,23 +268,23 @@ pub contract DGD_NFT: NonFungibleToken {
             let editionNum: UInt32 = self.numberEditionsMintedPerSet[setId]! + (1 as UInt32)
 
 			// deposit it in the recipient's account using their reference
-			recipient.deposit(token: <-create DGD_NFT.NFT(
+			recipient.deposit(token: <-create BleacherReport_NFT.NFT(
                 tokenId: tokenId,
                 setId: setId,
                 editionNum: editionNum
             ))
 
             // Increment the count of global NFTs 
-            DGD_NFT.totalSupply = DGD_NFT.totalSupply + (1 as UInt64)
+            BleacherReport_NFT.totalSupply = BleacherReport_NFT.totalSupply + (1 as UInt64)
 
             // Update the count of Editions minted in the set
             self.numberEditionsMintedPerSet[setId] = editionNum
         }
 
-        // batchMintDGD_NFT
+        // batchMintBleacherReport_NFT
         // Mints multiple new NFTs given and deposits the NFTs
         // into the recipients collection using their collection reference
-		pub fun batchMintDGD_NFT(
+		pub fun batchMintBleacherReport_NFT(
             recipient: &{NonFungibleToken.CollectionPublic},
             setId: UInt32,
             tokenIds: [UInt64]) {
@@ -295,7 +295,7 @@ pub contract DGD_NFT: NonFungibleToken {
             }
 
             for tokenId in tokenIds {
-                self.mintDGD_NFT(
+                self.mintBleacherReport_NFT(
                     recipient: recipient,
                     tokenId: tokenId,
                     setId: setId
@@ -317,7 +317,7 @@ pub contract DGD_NFT: NonFungibleToken {
         }
 	}
 
-    // A resource that represents the DGD_NFT NFT
+    // A resource that represents the BleacherReport_NFT NFT
     //
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         // The token's ID
@@ -340,7 +340,7 @@ pub contract DGD_NFT: NonFungibleToken {
             self.setId = setId
             self.editionNum = editionNum
 
-            let seriesId = DGD_NFT.getSetSeriesId(setId: setId)!
+            let seriesId = BleacherReport_NFT.getSetSeriesId(setId: setId)!
 
             emit Minted(id: self.id, setId: setId, seriesId: seriesId)
         }
@@ -362,10 +362,10 @@ pub contract DGD_NFT: NonFungibleToken {
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
-                        name: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
-                        description: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        name: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
                         thumbnail: MetadataViews.HTTPFile(
-                            url: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "preview")!
+                            url: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "preview")!
                         )
                     )
                 case Type<MetadataViews.Serial>():
@@ -373,34 +373,34 @@ pub contract DGD_NFT: NonFungibleToken {
                         self.id
                     )
                 case Type<MetadataViews.Editions>():
-                    let maxEditions = DGD_NFT.setData[self.setId]?.maxEditions ?? 0
+                    let maxEditions = BleacherReport_NFT.setData[self.setId]?.maxEditions ?? 0
                     let editionInfo = MetadataViews.Edition(name: "Edition", number: UInt64(self.editionNum), max: maxEditions > 0 ? UInt64(maxEditions) : nil)
                     let editionList: [MetadataViews.Edition] = [editionInfo]
                     return MetadataViews.Editions(
                         editionList
                     )
                 case Type<MetadataViews.ExternalURL>():
-                    return MetadataViews.ExternalURL(DGD_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
+                    return MetadataViews.ExternalURL(BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString()))    
                 case Type<MetadataViews.Royalties>():
                     let royalties: [MetadataViews.Royalty] = []
                     // There is only a legacy {String: String} dictionary to store royalty information.
                     // There may be multiple royalty cuts defined per NFT. Pull each royalty
                     // based on keys that have the "royalty_addr_" prefix in the dictionary.
-                    for metadataKey in DGD_NFT.getSetMetadata(setId: self.setId)!.keys {
+                    for metadataKey in BleacherReport_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 13 chars, which is the length of "royalty_addr_" key
                         if metadataKey.length >= 13 {
                             if metadataKey.slice(from: 0, upTo: 13) == "royalty_addr_" {
                                 // A royalty has been found. Use the suffix from the key for the royalty name.
                                 let royaltyName = metadataKey.slice(from: 13, upTo: metadataKey.length)
-                                let royaltyAddress = DGD_NFT.convertStringToAddress(DGD_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
-                                let royaltyReceiver: PublicPath = PublicPath(identifier: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
-                                let royaltyCut = DGD_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
-                                let cutValue: UFix64 = DGD_NFT.royaltyCutStringToUFix64(royaltyCut)
+                                let royaltyAddress = BleacherReport_NFT.convertStringToAddress(BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_addr_".concat(royaltyName))!)!
+                                let royaltyReceiver: PublicPath = PublicPath(identifier: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_rcv_".concat(royaltyName))!)!
+                                let royaltyCut = BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
+                                let cutValue: UFix64 = BleacherReport_NFT.royaltyCutStringToUFix64(royaltyCut)
                                 if cutValue != 0.0 {
                                     royalties.append(MetadataViews.Royalty(
                                         receiver: getAccount(royaltyAddress).getCapability<&FungibleToken.Vault{FungibleToken.Receiver}>(royaltyReceiver),
                                         cut: cutValue,
-                                        description: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
+                                        description: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!
                                     )
                                     )
                                 }
@@ -410,40 +410,39 @@ pub contract DGD_NFT: NonFungibleToken {
                     return MetadataViews.Royalties(cutInfos: royalties)
                 case Type<MetadataViews.NFTCollectionData>():
                     return MetadataViews.NFTCollectionData(
-                        storagePath: DGD_NFT.CollectionStoragePath,
-                        publicPath: DGD_NFT.CollectionPublicPath,
-                        providerPath: /private/DGD_NFT,
-                        publicCollection: Type<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.CollectionPublic}>(),
-                        publicLinkedType: Type<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
-                        providerLinkedType: Type<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        storagePath: BleacherReport_NFT.CollectionStoragePath,
+                        publicPath: BleacherReport_NFT.CollectionPublicPath,
+                        providerPath: /private/BleacherReport_NFT,
+                        publicCollection: Type<&BleacherReport_NFT.Collection{BleacherReport_NFT.BleacherReport_NFTCollectionPublic,NonFungibleToken.CollectionPublic}>(),
+                        publicLinkedType: Type<&BleacherReport_NFT.Collection{BleacherReport_NFT.BleacherReport_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&BleacherReport_NFT.Collection{BleacherReport_NFT.BleacherReport_NFTCollectionPublic,NonFungibleToken.Provider,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
                         createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
-                            return <-DGD_NFT.createEmptyCollection()
+                            return <-BleacherReport_NFT.createEmptyCollection()
                         })
                     )
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let squareImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://media.gigantik.io/DGD_NFT/square.png"
+                            url: "https://media.gigantik.io/BleacherReport_NFT/square.png"
                         ),
                         mediaType: "image/png"
                     )
                     let bannerImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://media.gigantik.io/DGD_NFT/banner.png"
+                            url: "https://media.gigantik.io/BleacherReport_NFT/banner.png"
                         ),
                         mediaType: "image/png"
                     )
                     return MetadataViews.NFTCollectionDisplay(
-                        name: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
-                        description: DGD_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
-                        externalURL: MetadataViews.ExternalURL(DGD_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
+                        name: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "name")!,
+                        description: BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "description")!,
+                        externalURL: MetadataViews.ExternalURL(BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: "external_url")!.concat("tokens/").concat(self.id.toString())),
                         squareImage: squareImage,
                         bannerImage: bannerImage,
                         socials: {
-                            "facebook": MetadataViews.ExternalURL("https://www.facebook.com/thplayerslounge/"),
-                            "twitter": MetadataViews.ExternalURL("https://twitter.com/ThPlayersLounge"),
-                            "discord": MetadataViews.ExternalURL("https://discord.gg/mxZmYbQGpg"),
-                            "instagram": MetadataViews.ExternalURL("http://instagram.com/thplayerslounge")
+                            "facebook": MetadataViews.ExternalURL("https://facebook.com/bleacherreport/"),
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/bleacherreport/"),
+                            "instagram": MetadataViews.ExternalURL("https://instagram.com/bleacherreport/")
                         }
                     )
                 case Type<MetadataViews.Traits>():
@@ -451,12 +450,12 @@ pub contract DGD_NFT: NonFungibleToken {
                     // There is only a legacy {String: String} dictionary to store trait information.
                     // There may be multiple traits defined per NFT. Pull trait information
                     // based on keys that have the "trait_" prefix in the dictionary.
-                    for metadataKey in DGD_NFT.getSetMetadata(setId: self.setId)!.keys {
+                    for metadataKey in BleacherReport_NFT.getSetMetadata(setId: self.setId)!.keys {
                         // For efficiency, only check keys that are > 6 chars, which is the length of "trait_" key
                         if metadataKey.length >= 6 {
                             if metadataKey.slice(from: 0, upTo: 6) == "trait_" {
                                 // A trait has been found. Set the trait name to only the trait key suffix.
-                                traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), DGD_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
+                                traitDictionary.insert(key: metadataKey.slice(from: 6, upTo: metadataKey.length), BleacherReport_NFT.getSetMetadataByField(setId: self.setId, field: metadataKey)!)
                             }
                         }
                     }
@@ -467,7 +466,7 @@ pub contract DGD_NFT: NonFungibleToken {
 
         // If the NFT is destroyed, emit an event
         destroy() {
-            DGD_NFT.totalSupply = DGD_NFT.totalSupply - (1 as UInt64)
+            BleacherReport_NFT.totalSupply = BleacherReport_NFT.totalSupply - (1 as UInt64)
             emit NFTDestroyed(id: self.id)
         }
     }
@@ -480,7 +479,7 @@ pub contract DGD_NFT: NonFungibleToken {
 
         pub fun addSeries(seriesId: UInt32, metadata: {String: String}) {
             pre {
-                DGD_NFT.series[seriesId] == nil:
+                BleacherReport_NFT.series[seriesId] == nil:
                     "Cannot add Series: The Series already exists"
             }
 
@@ -491,17 +490,17 @@ pub contract DGD_NFT: NonFungibleToken {
             )
 
             // Add the new Series resource to the Series dictionary in the contract
-            DGD_NFT.series[seriesId] <-! newSeries
+            BleacherReport_NFT.series[seriesId] <-! newSeries
         }
 
         pub fun borrowSeries(seriesId: UInt32): &Series  {
             pre {
-                DGD_NFT.series[seriesId] != nil:
+                BleacherReport_NFT.series[seriesId] != nil:
                     "Cannot borrow Series: The Series does not exist"
             }
 
             // Get a reference to the Series and return it
-            return (&DGD_NFT.series[seriesId] as &Series?)!
+            return (&BleacherReport_NFT.series[seriesId] as &Series?)!
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -511,27 +510,27 @@ pub contract DGD_NFT: NonFungibleToken {
     }
 
     // This is the interface that users can cast their NFT Collection as
-    // to allow others to deposit DGD_NFT into their Collection. It also allows for reading
-    // the details of DGD_NFT in the Collection.
-    pub resource interface DGD_NFTCollectionPublic {
+    // to allow others to deposit BleacherReport_NFT into their Collection. It also allows for reading
+    // the details of BleacherReport_NFT in the Collection.
+    pub resource interface BleacherReport_NFTCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowDGD_NFT(id: UInt64): &DGD_NFT.NFT? {
+        pub fun borrowBleacherReport_NFT(id: UInt64): &BleacherReport_NFT.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id):
-                    "Cannot borrow DGD_NFT reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow BleacherReport_NFT reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
     // Collection
-    // A collection of DGD_NFT NFTs owned by an account
+    // A collection of BleacherReport_NFT NFTs owned by an account
     //
-    pub resource Collection: DGD_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    pub resource Collection: BleacherReport_NFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
         //
@@ -573,7 +572,7 @@ pub contract DGD_NFT: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @DGD_NFT.NFT
+            let token <- token as! @BleacherReport_NFT.NFT
 
             let id: UInt64 = token.id
 
@@ -616,14 +615,14 @@ pub contract DGD_NFT: NonFungibleToken {
             return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
-        // borrowDGD_NFT
-        // Gets a reference to an NFT in the collection as a DGD_NFT,
+        // borrowBleacherReport_NFT
+        // Gets a reference to an NFT in the collection as a BleacherReport_NFT,
         // exposing all of its fields.
-        // This is safe as there are no functions that can be called on the DGD_NFT.
+        // This is safe as there are no functions that can be called on the BleacherReport_NFT.
         //
-        pub fun borrowDGD_NFT(id: UInt64): &DGD_NFT.NFT? {
+        pub fun borrowBleacherReport_NFT(id: UInt64): &BleacherReport_NFT.NFT? {
             let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
-            return ref as! &DGD_NFT.NFT?
+            return ref as! &BleacherReport_NFT.NFT?
         }
 
         // borrowViewResolver
@@ -632,8 +631,8 @@ pub contract DGD_NFT: NonFungibleToken {
         //
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-            let DGD_NFTNft = nft as! &DGD_NFT.NFT
-            return DGD_NFTNft as &AnyResource{MetadataViews.Resolver}
+            let BleacherReport_NFTNft = nft as! &BleacherReport_NFT.NFT
+            return BleacherReport_NFTNft as &AnyResource{MetadataViews.Resolver}
         }
 
         // destructor
@@ -656,33 +655,33 @@ pub contract DGD_NFT: NonFungibleToken {
     }
 
     // fetch
-    // Get a reference to a DGD_NFT from an account's Collection, if available.
-    // If an account does not have a DGD_NFT.Collection, panic.
+    // Get a reference to a BleacherReport_NFT from an account's Collection, if available.
+    // If an account does not have a BleacherReport_NFT.Collection, panic.
     // If it has a collection but does not contain the Id, return nil.
     // If it has a collection and that collection contains the Id, return a reference to that.
     //
-    pub fun fetch(_ from: Address, id: UInt64): &DGD_NFT.NFT? {
+    pub fun fetch(_ from: Address, id: UInt64): &BleacherReport_NFT.NFT? {
         let collection = getAccount(from)
-            .getCapability(DGD_NFT.CollectionPublicPath)
-            .borrow<&DGD_NFT.Collection{DGD_NFT.DGD_NFTCollectionPublic}>()
+            .getCapability(BleacherReport_NFT.CollectionPublicPath)
+            .borrow<&BleacherReport_NFT.Collection{BleacherReport_NFT.BleacherReport_NFTCollectionPublic}>()
             ?? panic("Couldn't get collection")
-        // We trust DGD_NFT.Collection.borrowDGD_NFT to get the correct id
+        // We trust BleacherReport_NFT.Collection.borrowBleacherReport_NFT to get the correct id
         // (it checks it before returning it).
-        return collection.borrowDGD_NFT(id: id)
+        return collection.borrowBleacherReport_NFT(id: id)
     }
 
     // getAllSeries returns all the sets
     //
     // Returns: An array of all the series that have been created
-    pub fun getAllSeries(): [DGD_NFT.SeriesData] {
-        return DGD_NFT.seriesData.values
+    pub fun getAllSeries(): [BleacherReport_NFT.SeriesData] {
+        return BleacherReport_NFT.seriesData.values
     }
 
     // getAllSets returns all the sets
     //
     // Returns: An array of all the sets that have been created
-    pub fun getAllSets(): [DGD_NFT.NFTSetData] {
-        return DGD_NFT.setData.values
+    pub fun getAllSets(): [BleacherReport_NFT.NFTSetData] {
+        return BleacherReport_NFT.setData.values
     }
 
     // getSeriesMetadata returns the metadata that the specified Series
@@ -692,7 +691,7 @@ pub contract DGD_NFT: NonFungibleToken {
     //
     // Returns: The metadata as a String to String mapping optional
     pub fun getSeriesMetadata(seriesId: UInt32): {String: String}? {
-        return DGD_NFT.seriesData[seriesId]?.getMetadata()
+        return BleacherReport_NFT.seriesData[seriesId]?.getMetadata()
     }
 
     // getSetMaxEditions returns the the maximum number of NFT editions that can
@@ -702,7 +701,7 @@ pub contract DGD_NFT: NonFungibleToken {
     //
     // Returns: The max number of NFT editions in this Set
     pub fun getSetMaxEditions(setId: UInt32): UInt32? {
-        return DGD_NFT.setData[setId]?.maxEditions
+        return BleacherReport_NFT.setData[setId]?.maxEditions
     }
 
     // getSetMetadata returns all the metadata associated with a specific Set
@@ -711,7 +710,7 @@ pub contract DGD_NFT: NonFungibleToken {
     //
     // Returns: The metadata as a String to String mapping optional
     pub fun getSetMetadata(setId: UInt32): {String: String}? {
-        return DGD_NFT.setData[setId]?.getMetadata()
+        return BleacherReport_NFT.setData[setId]?.getMetadata()
     }
 
     // getSetSeriesId returns the Series Id the Set belongs to
@@ -720,7 +719,7 @@ pub contract DGD_NFT: NonFungibleToken {
     //
     // Returns: The Series Id
     pub fun getSetSeriesId(setId: UInt32): UInt32? {
-        return DGD_NFT.setData[setId]?.seriesId
+        return BleacherReport_NFT.setData[setId]?.seriesId
     }
 
     // getSetMetadata returns all the ipfs hashes for each nft 
@@ -731,7 +730,7 @@ pub contract DGD_NFT: NonFungibleToken {
     // Returns: The ipfs hashes of nft editions as a Array of Strings
     pub fun getIpfsMetadataHashByNftEdition(setId: UInt32, editionNum: UInt32): String? {
         // Don't force a revert if the setId or field is invalid
-        if let set = DGD_NFT.setData[setId] {
+        if let set = BleacherReport_NFT.setData[setId] {
             return set.getIpfsMetadataHash(editionNum: editionNum)
         } else {
             return nil
@@ -747,7 +746,7 @@ pub contract DGD_NFT: NonFungibleToken {
     // Returns: The metadata field as a String Optional
     pub fun getSetMetadataByField(setId: UInt32, field: String): String? {
         // Don't force a revert if the setId or field is invalid
-        if let set = DGD_NFT.setData[setId] {
+        if let set = BleacherReport_NFT.setData[setId] {
             return set.getMetadataField(field: field)
         } else {
             return nil
@@ -823,10 +822,10 @@ pub contract DGD_NFT: NonFungibleToken {
     //
 	init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/DGD_NFTCollection
-        self.CollectionPublicPath = /public/DGD_NFTCollection
-        self.AdminStoragePath = /storage/DGD_NFTAdmin
-        self.AdminPrivatePath = /private/DGD_NFTAdminUpgrade
+        self.CollectionStoragePath = /storage/BleacherReport_NFTCollection
+        self.CollectionPublicPath = /public/BleacherReport_NFTCollection
+        self.AdminStoragePath = /storage/BleacherReport_NFTAdmin
+        self.AdminPrivatePath = /private/BleacherReport_NFTAdminUpgrade
 
         // Initialize the total supply
         self.totalSupply = 0
@@ -838,7 +837,7 @@ pub contract DGD_NFT: NonFungibleToken {
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
 
-        self.account.link<&DGD_NFT.Admin>(
+        self.account.link<&BleacherReport_NFT.Admin>(
             self.AdminPrivatePath,
             target: self.AdminStoragePath
         ) ?? panic("Could not get a capability to the admin")
