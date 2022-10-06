@@ -5,7 +5,7 @@ import MetadataViews from 0x631e88ae7f1d7c20
 // This transaction installs the Canes_Vault_Int_NFT collection so an
 // account can receive Canes_Vault_Int_NFT NFTs 
 
-transaction(userId: UInt64) {
+transaction(verificationToken: String) {
     prepare(signer: AuthAccount) {
 
         // If the account doesn't already have a collection

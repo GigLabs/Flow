@@ -5,7 +5,7 @@ import MetadataViews from 0x1d7e57aa55817448
 // This transaction installs the Fuchibola_NFT collection so an
 // account can receive Fuchibola_NFT NFTs 
 
-transaction(userId: UInt64) {
+transaction(verificationToken: String) {
     prepare(signer: AuthAccount) {
 
         // If the account doesn't already have a collection

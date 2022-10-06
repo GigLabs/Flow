@@ -5,7 +5,7 @@ import MetadataViews from 0x631e88ae7f1d7c20
 // This transaction installs the costacos123_NFT collection so an
 // account can receive costacos123_NFT NFTs 
 
-transaction(userId: UInt64) {
+transaction(verificationToken: String) {
     prepare(signer: AuthAccount) {
 
         // If the account doesn't already have a collection
