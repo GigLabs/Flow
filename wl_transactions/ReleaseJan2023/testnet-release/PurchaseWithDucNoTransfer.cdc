@@ -56,7 +56,7 @@ transaction(sellerAddress: Address, orderUuid: String, price: UFix64, metadata: 
   }
   pre {
     // Make sure the seller is the right account
-    self.gigAuthAccountAddress == 0x5d2efb448f701c35 && sellerAddress == 0x5d2efb448f701c35: "seller must be GigLabs"
+    self.gigAuthAccountAddress == 0x5d2efb448f701c35 && sellerAddress == 0x6f8aa41eedff1158: "seller must be GigLabs"
   }
   execute {
     self.sellerPaymentReceiver.deposit(from: <- self.paymentVault)

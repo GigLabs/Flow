@@ -8,10 +8,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
     let dgd_NFTProvider: Capability<&dgd_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
-    let gigAddress: Address
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
-        self.gigAddress = gig.address
         // If the account doesn't already have a Storefront
         if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
 
@@ -56,9 +54,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
             }
         }
     }
-    pre {
-        self.gigAddress == 0x04625c28593d9408: "Requires valid authorizing signature"
-    }
+
     execute {
         let amountSeller = saleItemPrice * (1.0 - royaltyPercent)
         let amountRoyalty = saleItemPrice - amountSeller

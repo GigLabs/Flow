@@ -8,10 +8,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
     let releasejan2023_NFTProvider: Capability<&releasejan2023_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
-    let gigAddress: Address
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
-        self.gigAddress = gig.address
         // If the account doesn't already have a Storefront
         if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
 
@@ -56,15 +54,13 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
             }
         }
     }
-    pre {
-        self.gigAddress == 0x5d2efb448f701c35: "Requires valid authorizing signature"
-    }
+
     execute {
         let amountSeller = saleItemPrice * (1.0 - royaltyPercent)
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0x5d2efb448f701c35)
+        let royaltyRecipient = getAccount(0x6f8aa41eedff1158)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
