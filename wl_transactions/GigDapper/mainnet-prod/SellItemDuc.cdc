@@ -1,17 +1,15 @@
-import FungibleToken from 0x9a0766d93b6608b7
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import DapperUtilityCoin from 0x82ec283f88a62e65
-import Canes_Vault_Int_NFT from 0x04625c28593d9408
-import NFTStorefront from 0x94b06cfca1d8a476
+import FungibleToken from 0xf233dcee88fe0abe
+import NonFungibleToken from 0x1d7e57aa55817448
+import DapperUtilityCoin from 0xead892083b3e2c6c
+import GigDapper_NFT from 0x0f8d3495fb3e8d4b
+import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let Canes_Vault_Int_NFTProvider: Capability<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let GigDapper_NFTProvider: Capability<&GigDapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
-    let gigAddress: Address
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
-        self.gigAddress = gig.address
         // If the account doesn't already have a Storefront
         if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
 
@@ -29,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let Canes_Vault_Int_NFTCollectionProviderPrivatePath = /private/Canes_Vault_Int_NFTCollectionProviderForNFTStorefront
+        let GigDapper_NFTCollectionProviderPrivatePath = /private/GigDapper_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (Canes_Vault_Int_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (Canes_Vault_Int_NFTCollectionProviderPrivatePath, target: Canes_Vault_Int_NFT.CollectionStoragePath)
+        if !acct.getCapability<&GigDapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (GigDapper_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&GigDapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (GigDapper_NFTCollectionProviderPrivatePath, target: GigDapper_NFT.CollectionStoragePath)
         }
 
-        self.Canes_Vault_Int_NFTProvider = acct.getCapability<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(Canes_Vault_Int_NFTCollectionProviderPrivatePath)!
-        assert(self.Canes_Vault_Int_NFTProvider.borrow() != nil, message: "Missing or mis-typed Canes_Vault_Int_NFT.Collection provider")
+        self.GigDapper_NFTProvider = acct.getCapability<&GigDapper_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(GigDapper_NFTCollectionProviderPrivatePath)!
+        assert(self.GigDapper_NFTProvider.borrow() != nil, message: "Missing or mis-typed GigDapper_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -50,21 +48,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@Canes_Vault_Int_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@GigDapper_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
         }
     }
-    pre {
-        self.gigAddress == 0x04625c28593d9408: "Requires valid authorizing signature"
-    }
+
     execute {
         let amountSeller = saleItemPrice * (1.0 - royaltyPercent)
         let amountRoyalty = saleItemPrice - amountSeller
 
         // Get the royalty recipient's public account object
-        let royaltyRecipient = getAccount(0x6f8aa41eedff1158)
+        let royaltyRecipient = getAccount(0xb82ba4137573164c)
 
         // Get a reference to the royalty recipient's Receiver
         let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
@@ -81,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.Canes_Vault_Int_NFTProvider,
-            nftType: Type<@Canes_Vault_Int_NFT.NFT>(),
+            nftProviderCapability: self.GigDapper_NFTProvider,
+            nftType: Type<@GigDapper_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

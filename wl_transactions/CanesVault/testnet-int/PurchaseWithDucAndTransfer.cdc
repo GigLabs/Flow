@@ -66,7 +66,7 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   }
   pre {
     // Make sure the seller is the right account
-    self.gigAuthAccountAddress == 0x04625c28593d9408 && sellerAddress == 0x564ad491cb42301c: "seller must be GigLabs"
+    self.gigAuthAccountAddress == 0x04625c28593d9408 && sellerAddress == 0x6f8aa41eedff1158: "seller must be GigLabs"
   }
   execute {
     self.sellerPaymentReceiver.deposit(from: <- self.paymentVault)
