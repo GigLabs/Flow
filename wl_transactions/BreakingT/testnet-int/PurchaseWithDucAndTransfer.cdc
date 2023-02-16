@@ -1,7 +1,7 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import breakingt_NFT from 0x04625c28593d9408
+import BreakingT_NFT from 0x04625c28593d9408
 import MetadataViews from 0x631e88ae7f1d7c20
 
 transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {String: String}) {
@@ -9,45 +9,45 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
   let paymentVault: @FungibleToken.Vault
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
   let gigNFTCollectionRef: @NonFungibleToken.Collection
-  let buyerNFTCollection: &AnyResource{breakingt_NFT.breakingt_NFTCollectionPublic}
+  let buyerNFTCollection: &AnyResource{BreakingT_NFT.BreakingT_NFTCollectionPublic}
   let balanceBeforeTransfer: UFix64
   let mainDucVault: &DapperUtilityCoin.Vault
       
   prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
     self.gigAuthAccountAddress = gig.address
     // If the account doesn't already have a collection
-    if buyer.borrow<&breakingt_NFT.Collection>(from: breakingt_NFT.CollectionStoragePath) == nil {
+    if buyer.borrow<&BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath) == nil {
 
         // Create a new empty collection and save it to the account
-        buyer.save(<-breakingt_NFT.createEmptyCollection(), to: breakingt_NFT.CollectionStoragePath)
+        buyer.save(<-BreakingT_NFT.createEmptyCollection(), to: BreakingT_NFT.CollectionStoragePath)
 
-        // Create a public capability to the breakingt_NFT collection
+        // Create a public capability to the BreakingT_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&breakingt_NFT.Collection{breakingt_NFT.breakingt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-            breakingt_NFT.CollectionPublicPath,
-            target: breakingt_NFT.CollectionStoragePath
+        buyer.link<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
+            BreakingT_NFT.CollectionPublicPath,
+            target: BreakingT_NFT.CollectionStoragePath
         )
     }
-    // If the account already has a breakingt_NFT collection, but has not yet exposed the 
+    // If the account already has a BreakingT_NFT collection, but has not yet exposed the 
     // Metadata Resolver interface for the Metadata Standard views
-    else if (buyer.getCapability<&breakingt_NFT.Collection{breakingt_NFT.breakingt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(breakingt_NFT.CollectionPublicPath).borrow() == nil) {
+    else if (buyer.getCapability<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(BreakingT_NFT.CollectionPublicPath).borrow() == nil) {
 
-        // Unlink the current capability exposing the breakingt_NFT collection,
+        // Unlink the current capability exposing the BreakingT_NFT collection,
         // as it needs to be replaced with an updated capability
-        buyer.unlink(breakingt_NFT.CollectionPublicPath)
+        buyer.unlink(BreakingT_NFT.CollectionPublicPath)
 
-        // Create the new public capability to the breakingt_NFT collection
+        // Create the new public capability to the BreakingT_NFT collection
         // that exposes the Collection interface, which now includes
         // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&breakingt_NFT.Collection{breakingt_NFT.breakingt_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-            breakingt_NFT.CollectionPublicPath,
-            target: breakingt_NFT.CollectionStoragePath
+        buyer.link<&BreakingT_NFT.Collection{BreakingT_NFT.BreakingT_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
+            BreakingT_NFT.CollectionPublicPath,
+            target: BreakingT_NFT.CollectionStoragePath
         )
     }
     
     // withdraw NFT
-    let gigNftProvider = gig.borrow<&breakingt_NFT.Collection>(from: breakingt_NFT.CollectionStoragePath)
+    let gigNftProvider = gig.borrow<&BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath)
         ?? panic("Could not borrow NFT Provider")
     self.gigNFTCollectionRef <- gigNftProvider.batchWithdraw(ids: nftIDs)
     // withdraw DUC
@@ -61,8 +61,8 @@ transaction(sellerAddress: Address, nftIDs: [UInt64], price: UFix64, metadata: {
     ?? panic("Could not borrow receiver reference to the recipient's Vault")
     // set buyer NFT receiver ref
     self.buyerNFTCollection = buyer
-    .getCapability(breakingt_NFT.CollectionPublicPath)!
-    .borrow<&{breakingt_NFT.breakingt_NFTCollectionPublic}>()!
+    .getCapability(BreakingT_NFT.CollectionPublicPath)!
+    .borrow<&{BreakingT_NFT.BreakingT_NFTCollectionPublic}>()!
   }
   pre {
     // Make sure the seller is the right account

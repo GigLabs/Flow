@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import breakingt_NFT from 0x04625c28593d9408
+import BreakingT_NFT from 0x04625c28593d9408
 import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
-    let breakingt_NFTCollection: &breakingt_NFT.Collection{NonFungibleToken.Receiver}
+    let BreakingT_NFTCollection: &BreakingT_NFT.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
     let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
@@ -15,16 +15,16 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
 
     prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&breakingt_NFT.Collection>(from: breakingt_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-breakingt_NFT.createEmptyCollection(), to: breakingt_NFT.CollectionStoragePath)
+            buyer.save(<-BreakingT_NFT.createEmptyCollection(), to: BreakingT_NFT.CollectionStoragePath)
 
-            // Create a public capability to the breakingt_NFT collection
+            // Create a public capability to the BreakingT_NFT collection
             // that exposes the Collection interface
-            buyer.link<&breakingt_NFT.Collection{NonFungibleToken.CollectionPublic,breakingt_NFT.breakingt_NFTCollectionPublic}>(
-                breakingt_NFT.CollectionPublicPath,
-                target: breakingt_NFT.CollectionStoragePath
+            buyer.link<&BreakingT_NFT.Collection{NonFungibleToken.CollectionPublic,BreakingT_NFT.BreakingT_NFTCollectionPublic}>(
+                BreakingT_NFT.CollectionPublicPath,
+                target: BreakingT_NFT.CollectionStoragePath
             )
         }
 
@@ -48,8 +48,8 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.breakingt_NFTCollection = buyer.borrow<&breakingt_NFT.Collection{NonFungibleToken.Receiver}>(
-            from: breakingt_NFT.CollectionStoragePath
+        self.BreakingT_NFTCollection = buyer.borrow<&BreakingT_NFT.Collection{NonFungibleToken.Receiver}>(
+            from: BreakingT_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }
 
@@ -63,7 +63,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
             payment: <-self.paymentVault
         )
 
-        self.breakingt_NFTCollection.deposit(token: <-item)
+        self.BreakingT_NFTCollection.deposit(token: <-item)
 
         // Be kind and recycle
         self.storefront.cleanup(listingResourceID: listingResourceID)

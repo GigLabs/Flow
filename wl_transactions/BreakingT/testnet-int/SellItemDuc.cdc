@@ -1,12 +1,12 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import DapperUtilityCoin from 0x82ec283f88a62e65
-import breakingt_NFT from 0x04625c28593d9408
+import BreakingT_NFT from 0x04625c28593d9408
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let breakingt_NFTProvider: Capability<&breakingt_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let BreakingT_NFTProvider: Capability<&BreakingT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
     prepare(gig: AuthAccount, acct: AuthAccount) {
@@ -27,19 +27,19 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         }
 
         // We need a provider capability, but one is not provided by default so we create one if needed.
-        let breakingt_NFTCollectionProviderPrivatePath = /private/breakingt_NFTCollectionProviderForNFTStorefront
+        let BreakingT_NFTCollectionProviderPrivatePath = /private/BreakingT_NFTCollectionProviderForNFTStorefront
 
         self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&breakingt_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (breakingt_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&breakingt_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (breakingt_NFTCollectionProviderPrivatePath, target: breakingt_NFT.CollectionStoragePath)
+        if !acct.getCapability<&BreakingT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+        (BreakingT_NFTCollectionProviderPrivatePath)!.check() {
+            acct.link<&BreakingT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+            (BreakingT_NFTCollectionProviderPrivatePath, target: BreakingT_NFT.CollectionStoragePath)
         }
 
-        self.breakingt_NFTProvider = acct.getCapability<&breakingt_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(breakingt_NFTCollectionProviderPrivatePath)!
-        assert(self.breakingt_NFTProvider.borrow() != nil, message: "Missing or mis-typed breakingt_NFT.Collection provider")
+        self.BreakingT_NFTProvider = acct.getCapability<&BreakingT_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(BreakingT_NFTCollectionProviderPrivatePath)!
+        assert(self.BreakingT_NFTProvider.borrow() != nil, message: "Missing or mis-typed BreakingT_NFT.Collection provider")
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
@@ -48,7 +48,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@breakingt_NFT.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@BreakingT_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -77,8 +77,8 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         )
 
         self.storefront.createListing(
-            nftProviderCapability: self.breakingt_NFTProvider,
-            nftType: Type<@breakingt_NFT.NFT>(),
+            nftProviderCapability: self.BreakingT_NFTProvider,
+            nftType: Type<@BreakingT_NFT.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]

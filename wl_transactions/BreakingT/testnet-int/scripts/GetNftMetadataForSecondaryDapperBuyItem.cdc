@@ -2,7 +2,7 @@
 // Get metadata for a single NFT in a owner's collection
 // needed to display the NFT in dapper wallet
 // during the secondary purchase of an NFT
-import breakingt_NFT from 0x04625c28593d9408
+import BreakingT_NFT from 0x04625c28593d9408
 import NFTStorefront from 0x94b06cfca1d8a476
 
 pub struct PurchaseData {
@@ -37,12 +37,12 @@ pub fun main(storefrontAddress: Address, listingResourceID: UInt64, expectedPric
     let listingDetails = listing.getDetails()
 
     // Get the NFT and use it to fetch set metadata
-    let collectionRef = acct.getCapability(breakingt_NFT.CollectionPublicPath)
-        .borrow<&{breakingt_NFT.breakingt_NFTCollectionPublic}>()
+    let collectionRef = acct.getCapability(BreakingT_NFT.CollectionPublicPath)
+        .borrow<&{BreakingT_NFT.BreakingT_NFTCollectionPublic}>()
         ?? panic("Could not borrow collection from address")
-    let nft = collectionRef.borrowbreakingt_NFT(id: listingDetails.nftID)
+    let nft = collectionRef.borrowBreakingT_NFT(id: listingDetails.nftID)
         ?? panic("No item with that ID")
-    let setMetadata = breakingt_NFT.getSetMetadata(setId: nft.setId) ?? panic("no metadata found")
+    let setMetadata = BreakingT_NFT.getSetMetadata(setId: nft.setId) ?? panic("no metadata found")
 
     return PurchaseData(
         id: listingDetails.nftID,

@@ -1,5 +1,5 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import breakingt_NFT from 0x04625c28593d9408
+import BreakingT_NFT from 0x04625c28593d9408
 
 // This transaction transfers all a user's NFTs from a Collection directly 
 // back to the same user's account. The purpose of this transaction is 
@@ -16,7 +16,7 @@ transaction() {
     prepare(acct: AuthAccount) {
 
         // borrow a reference to the owner's NFT collection
-        let collectionRef = acct.borrow<&breakingt_NFT.Collection>(from: breakingt_NFT.CollectionStoragePath)
+        let collectionRef = acct.borrow<&BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // get all owned token ids from the owner's collection
