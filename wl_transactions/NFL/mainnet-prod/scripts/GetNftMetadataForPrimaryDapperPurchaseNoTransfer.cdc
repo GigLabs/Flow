@@ -3,12 +3,12 @@
 // needed to display the NFT in dapper wallet
 // during the primary purchase of an NFT
 // token ids are not included in txn arguments
-pub struct PurchaseData {
-  pub let id: UInt64
-  pub let name: String?
-  pub let amount: UFix64
-  pub let description: String?
-  pub let imageURL: String?
+access(all) struct PurchaseData {
+  access(all) let id: UInt64
+  access(all) let name: String?
+  access(all) let amount: UFix64
+  access(all) let description: String?
+  access(all) let imageURL: String?
 
   init(id: UInt64, name: String?, amount: UFix64, description: String?, imageURL: String?) {
       self.id = id
@@ -19,7 +19,7 @@ pub struct PurchaseData {
   }
 }
 
-pub fun main(sellerAddress: Address, orderUuid: String, price: UFix64, metadata: {String: String}): PurchaseData {
+access(all) fun main(sellerAddress: Address, orderUuid: String, price: UFix64, metadata: {String: String}): PurchaseData {
   return PurchaseData(
       id: 0,
       name: metadata["name"],

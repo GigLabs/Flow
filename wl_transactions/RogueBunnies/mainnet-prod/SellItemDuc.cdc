@@ -1,53 +1,43 @@
+
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
-import DapperUtilityCoin from 0xead892083b3e2c6c
+import DapperUtilityCoin from 0xGENERAL_FUNGIBLE_ADDRESS
 import RogueBunnies_NFT from 0x396646f110afb2e6
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let RogueBunnies_NFTProvider: Capability<&RogueBunnies_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-    let storefront: &NFTStorefront.Storefront
+    let RogueBunnies_NFTProvider: Capability<auth(NonFungibleToken.Withdraw) &RogueBunnies_NFT.Collection>
+    let storefront: auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront
 
-    prepare(gig: AuthAccount, acct: AuthAccount) {
-        // If the account doesn't already have a Storefront
-        if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
+    prepare(gig: &Account, acct: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account) {
+        if acct.storage.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
 
             // Create a new empty .Storefront
-            let newstorefront <- NFTStorefront.createStorefront() as! @NFTStorefront.Storefront
+            let storefront <- NFTStorefront.createStorefront()
             
             // save it to the account
-            acct.save(<-newstorefront, to: NFTStorefront.StorefrontStoragePath)
+            acct.storage.save(<-storefront, to: NFTStorefront.StorefrontStoragePath)
 
             // create a public capability for the .Storefront
-            acct.link<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
-                NFTStorefront.StorefrontPublicPath,
-                target: NFTStorefront.StorefrontStoragePath
-            )
+            acct.capabilities.unpublish(NFTStorefront.StorefrontPublicPath)
+            let storefrontCap = acct.capabilities.storage.issue<&NFTStorefront.Storefront>(NFTStorefront.StorefrontStoragePath)
+            acct.capabilities.publish(storefrontCap, at: NFTStorefront.StorefrontPublicPath)
         }
 
-        // We need a provider capability, but one is not provided by default so we create one if needed.
-        let RogueBunnies_NFTCollectionProviderPrivatePath = /private/RogueBunnies_NFTCollectionProviderForNFTStorefront
-
-        self.sellerPaymentReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+        self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(DapperUtilityCoin.ReceiverPublicPath)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        if !acct.getCapability<&RogueBunnies_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-        (RogueBunnies_NFTCollectionProviderPrivatePath)!.check() {
-            acct.link<&RogueBunnies_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-            (RogueBunnies_NFTCollectionProviderPrivatePath, target: RogueBunnies_NFT.CollectionStoragePath)
-        }
+        self.RogueBunnies_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection}>(RogueBunnies_NFT.CollectionStoragePath)
+        assert(self.RogueBunnies_NFTProvider.check(), message: "Missing or mis-typed RogueBunnies_NFT.Collection provider")
 
-        self.RogueBunnies_NFTProvider = acct.getCapability<&RogueBunnies_NFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(RogueBunnies_NFTCollectionProviderPrivatePath)!
-        assert(self.RogueBunnies_NFTProvider.borrow() != nil, message: "Missing or mis-typed RogueBunnies_NFT.Collection provider")
-
-        self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
+        self.storefront = acct.storage.borrow<auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
 
         let existingOffers = self.storefront.getListingIDs()
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
-                let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
+                let listing: &{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
                 if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@RogueBunnies_NFT.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
@@ -63,7 +53,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         let royaltyRecipient = getAccount(0xb82ba4137573164c)
 
         // Get a reference to the royalty recipient's Receiver
-        let royaltyReceiverRef = royaltyRecipient.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+        let royaltyReceiverRef = royaltyRecipient.capabilities.get<&{FungibleToken.Receiver}>(DapperUtilityCoin.ReceiverPublicPath)
         assert(royaltyReceiverRef.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin royalty receiver")
 
         let saleCutSeller = NFTStorefront.SaleCut(

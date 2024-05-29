@@ -1,3 +1,4 @@
+
 import NonFungibleToken from 0x1d7e57aa55817448
 import Bobblz_NFT from 0xd45e2bd9a3d5003b
 
@@ -13,14 +14,14 @@ import Bobblz_NFT from 0xd45e2bd9a3d5003b
 // token ownership can be correctly updated in Dapper wallet database.
 
 transaction() {
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(BorrowValue) &Account) {
 
         // borrow a reference to the owner's NFT collection
-        let collectionRef = acct.borrow<&Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath)
+        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // get all owned token ids from the owner's collection
-        let ids = collectionRef!.getIDs()
+        let ids = collectionRef.getIDs()
 
         // withdraw the list of NFTs from the owner's collection
         let ownerNfts <- collectionRef.batchWithdraw(ids: ids)
