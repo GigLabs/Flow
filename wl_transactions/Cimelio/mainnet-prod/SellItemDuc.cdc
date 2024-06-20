@@ -25,7 +25,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
             acct.capabilities.publish(storefrontCap, at: NFTStorefront.StorefrontPublicPath)
         }
 
-        self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(DapperUtilityCoin.ReceiverPublicPath)
+        self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
         self.Cimelio_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection}>(Cimelio_NFT.CollectionStoragePath)
@@ -53,7 +53,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         let royaltyRecipient = getAccount(0x56b610f9c0dbf02b)
 
         // Get a reference to the royalty recipient's Receiver
-        let royaltyReceiverRef = royaltyRecipient.capabilities.get<&{FungibleToken.Receiver}>(DapperUtilityCoin.ReceiverPublicPath)
+        let royaltyReceiverRef = royaltyRecipient.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(royaltyReceiverRef.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin royalty receiver")
 
         let saleCutSeller = NFTStorefront.SaleCut(
