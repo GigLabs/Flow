@@ -7,53 +7,38 @@ import MetadataViews from 0x631e88ae7f1d7c20
 
 transaction(sellerAddress: Address, orderUuid: String, price: UFix64, metadata: {String: String}) {
   let gigAuthAccountAddress: Address
-  let paymentVault: @FungibleToken.Vault
+  let paymentVault: @{FungibleToken.Vault}
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
   let balanceBeforeTransfer: UFix64
-  let mainDucVault: &DapperUtilityCoin.Vault
+  let mainDucVault: auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault
       
-  prepare(gig: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
+  prepare(
+    gig: &Account,
+    dapper: auth(BorrowValue) &Account,
+    buyer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account
+  ) {
     self.gigAuthAccountAddress = gig.address
-    // If the account doesn't already have a collection
-    if buyer.borrow<&cimelio_NFT.Collection>(from: cimelio_NFT.CollectionStoragePath) == nil {
+
+    // Initialize the buyer's collection if they do not already have one
+    if buyer.storage.borrow<&cimelio_NFT.Collection>(from: cimelio_NFT.CollectionStoragePath) == nil {
 
         // Create a new empty collection and save it to the account
-        buyer.save(<-cimelio_NFT.createEmptyCollection(), to: cimelio_NFT.CollectionStoragePath)
+        buyer.storage.save(<-cimelio_NFT.createEmptyCollection(nftType: Type<@cimelio_NFT.NFT>()), to: cimelio_NFT.CollectionStoragePath)
 
-        // Create a public capability to the cimelio_NFT collection
-        // that exposes the Collection interface, which now includes
-        // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&cimelio_NFT.Collection{cimelio_NFT.cimelio_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-            cimelio_NFT.CollectionPublicPath,
-            target: cimelio_NFT.CollectionStoragePath
-        )
-    }
-    // If the account already has a cimelio_NFT collection, but has not yet exposed the 
-    // Metadata Resolver interface for the Metadata Standard views
-    else if (buyer.getCapability<&cimelio_NFT.Collection{cimelio_NFT.cimelio_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(cimelio_NFT.CollectionPublicPath).borrow() == nil) {
-
-        // Unlink the current capability exposing the cimelio_NFT collection,
-        // as it needs to be replaced with an updated capability
-        buyer.unlink(cimelio_NFT.CollectionPublicPath)
-
-        // Create the new public capability to the cimelio_NFT collection
-        // that exposes the Collection interface, which now includes
-        // the Metadata Resolver to expose Metadata Standard views
-        buyer.link<&cimelio_NFT.Collection{cimelio_NFT.cimelio_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-            cimelio_NFT.CollectionPublicPath,
-            target: cimelio_NFT.CollectionStoragePath
-        )
+        // Publish a public capability for the collection
+        buyer.capabilities.unpublish(cimelio_NFT.CollectionPublicPath)
+        let collectionCap = buyer.capabilities.storage.issue<&cimelio_NFT.Collection>(cimelio_NFT.CollectionStoragePath)
+        buyer.capabilities.publish(collectionCap, at: cimelio_NFT.CollectionPublicPath)
     }
     
     // withdraw DUC
-    self.mainDucVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
+    self.mainDucVault = dapper.storage.borrow<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
         ?? panic("Could not borrow reference to Dapper Utility Coin vault")
     self.balanceBeforeTransfer = self.mainDucVault.balance
     self.paymentVault <- self.mainDucVault.withdraw(amount: price)
     // set seller DUC receiver ref
-    self.sellerPaymentReceiver = getAccount(sellerAddress).getCapability(/public/dapperUtilityCoinReceiver)
-    .borrow<&{FungibleToken.Receiver}>()
-    ?? panic("Could not borrow receiver reference to the recipient's Vault")
+    self.sellerPaymentReceiver = getAccount(sellerAddress).capabilities.borrow<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+    ?? panic("Could not borrow receiver reference to the recipient's DapperUtilityCoin vault")
   }
   pre {
     // Make sure the seller is the right account
