@@ -1,4 +1,3 @@
-
 import NonFungibleToken from 0x1d7e57aa55817448
 import BreakingT_NFT from 0x329feb3ab062d289
 
@@ -14,14 +13,14 @@ import BreakingT_NFT from 0x329feb3ab062d289
 // token ownership can be correctly updated in Dapper wallet database.
 
 transaction() {
-    prepare(acct: auth(BorrowValue) &Account) {
+    prepare(acct: AuthAccount) {
 
         // borrow a reference to the owner's NFT collection
-        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath)
+        let collectionRef = acct.borrow<&BreakingT_NFT.Collection>(from: BreakingT_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // get all owned token ids from the owner's collection
-        let ids = collectionRef.getIDs()
+        let ids = collectionRef!.getIDs()
 
         // withdraw the list of NFTs from the owner's collection
         let ownerNfts <- collectionRef.batchWithdraw(ids: ids)

@@ -1,4 +1,3 @@
-
 import NonFungibleToken from 0x1d7e57aa55817448
 import Fuchibola_NFT from 0xf3ee684cd0259fed
 
@@ -14,14 +13,14 @@ import Fuchibola_NFT from 0xf3ee684cd0259fed
 // token ownership can be correctly updated in Dapper wallet database.
 
 transaction() {
-    prepare(acct: auth(BorrowValue) &Account) {
+    prepare(acct: AuthAccount) {
 
         // borrow a reference to the owner's NFT collection
-        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &Fuchibola_NFT.Collection>(from: Fuchibola_NFT.CollectionStoragePath)
+        let collectionRef = acct.borrow<&Fuchibola_NFT.Collection>(from: Fuchibola_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // get all owned token ids from the owner's collection
-        let ids = collectionRef.getIDs()
+        let ids = collectionRef!.getIDs()
 
         // withdraw the list of NFTs from the owner's collection
         let ownerNfts <- collectionRef.batchWithdraw(ids: ids)

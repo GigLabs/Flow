@@ -1,4 +1,3 @@
-
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import CNN_NFT from 0x329feb3ab062d289
@@ -6,35 +5,35 @@ import DapperUtilityCoin from 0xead892083b3e2c6c
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
-    let paymentVault: @{FungibleToken.Vault}
-    let CNN_NFTCollection: &CNN_NFT.Collection
-    let storefront: &NFTStorefront.Storefront
-    let listing: &{NFTStorefront.ListingPublic}
+    let paymentVault: @FungibleToken.Vault
+    let CNN_NFTCollection: &CNN_NFT.Collection{NonFungibleToken.Receiver}
+    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
+    let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
     let balanceBeforeTransfer: UFix64
-    let mainDapperUtilityCoinVault: auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault
+    let mainDapperUtilityCoinVault: &DapperUtilityCoin.Vault
 
-    prepare(
-        dapper: auth(BorrowValue) &Account,
-        buyer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account
-    ) {
+    prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.storage.borrow<&CNN_NFT.Collection>(from: CNN_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&CNN_NFT.Collection>(from: CNN_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.storage.save(<-CNN_NFT.createEmptyCollection(nftType: Type<@CNN_NFT.NFT>()), to: CNN_NFT.CollectionStoragePath)
+            buyer.save(<-CNN_NFT.createEmptyCollection(), to: CNN_NFT.CollectionStoragePath)
 
-            // create a public capability for the collection
-            buyer.capabilities.unpublish(CNN_NFT.CollectionPublicPath)
-            let collectionCap = buyer.capabilities.storage.issue<&CNN_NFT.Collection>(CNN_NFT.CollectionStoragePath)
-            buyer.capabilities.publish(collectionCap, at: CNN_NFT.CollectionPublicPath)
+            // Create a public capability to the CNN_NFT collection
+            // that exposes the Collection interface
+            buyer.link<&CNN_NFT.Collection{NonFungibleToken.CollectionPublic,CNN_NFT.CNN_NFTCollectionPublic}>(
+                CNN_NFT.CollectionPublicPath,
+                target: CNN_NFT.CollectionStoragePath
+            )
         }
 
         // Get the storefront reference from the seller
         self.storefront = getAccount(storefrontAddress)
-            .capabilities.borrow<&NFTStorefront.Storefront>(
+            .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
                 NFTStorefront.StorefrontPublicPath
-            )
+            )!
+            .borrow()
             ?? panic("Could not borrow Storefront from provided address")
 
         // Get the listing by ID from the storefront
@@ -43,13 +42,13 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         self.price = self.listing.getDetails().salePrice
 
         // Withdraw mainDapperUtilityCoinVault from Dapper's account
-        self.mainDapperUtilityCoinVault = dapper.storage.borrow<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
+        self.mainDapperUtilityCoinVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
             ?? panic("Cannot borrow DapperUtilityCoin vault from account storage")
         self.balanceBeforeTransfer = self.mainDapperUtilityCoinVault.balance
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.CNN_NFTCollection = buyer.storage.borrow<&CNN_NFT.Collection>(
+        self.CNN_NFTCollection = buyer.borrow<&CNN_NFT.Collection{NonFungibleToken.Receiver}>(
             from: CNN_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }

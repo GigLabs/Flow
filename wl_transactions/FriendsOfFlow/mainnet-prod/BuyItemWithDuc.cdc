@@ -1,4 +1,3 @@
-
 import FungibleToken from 0xf233dcee88fe0abe
 import NonFungibleToken from 0x1d7e57aa55817448
 import FriendsOfFlow_NFT from 0xcee3d6cc34301ad1
@@ -6,35 +5,35 @@ import DapperUtilityCoin from 0xead892083b3e2c6c
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
-    let paymentVault: @{FungibleToken.Vault}
-    let FriendsOfFlow_NFTCollection: &FriendsOfFlow_NFT.Collection
-    let storefront: &NFTStorefront.Storefront
-    let listing: &{NFTStorefront.ListingPublic}
+    let paymentVault: @FungibleToken.Vault
+    let FriendsOfFlow_NFTCollection: &FriendsOfFlow_NFT.Collection{NonFungibleToken.Receiver}
+    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
+    let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
     let price: UFix64
     let balanceBeforeTransfer: UFix64
-    let mainDapperUtilityCoinVault: auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault
+    let mainDapperUtilityCoinVault: &DapperUtilityCoin.Vault
 
-    prepare(
-        dapper: auth(BorrowValue) &Account,
-        buyer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account
-    ) {
+    prepare(dapper: AuthAccount, buyer: AuthAccount) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.storage.borrow<&FriendsOfFlow_NFT.Collection>(from: FriendsOfFlow_NFT.CollectionStoragePath) == nil {
+        if buyer.borrow<&FriendsOfFlow_NFT.Collection>(from: FriendsOfFlow_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.storage.save(<-FriendsOfFlow_NFT.createEmptyCollection(nftType: Type<@FriendsOfFlow_NFT.NFT>()), to: FriendsOfFlow_NFT.CollectionStoragePath)
+            buyer.save(<-FriendsOfFlow_NFT.createEmptyCollection(), to: FriendsOfFlow_NFT.CollectionStoragePath)
 
-            // create a public capability for the collection
-            buyer.capabilities.unpublish(FriendsOfFlow_NFT.CollectionPublicPath)
-            let collectionCap = buyer.capabilities.storage.issue<&FriendsOfFlow_NFT.Collection>(FriendsOfFlow_NFT.CollectionStoragePath)
-            buyer.capabilities.publish(collectionCap, at: FriendsOfFlow_NFT.CollectionPublicPath)
+            // Create a public capability to the FriendsOfFlow_NFT collection
+            // that exposes the Collection interface
+            buyer.link<&FriendsOfFlow_NFT.Collection{NonFungibleToken.CollectionPublic,FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic}>(
+                FriendsOfFlow_NFT.CollectionPublicPath,
+                target: FriendsOfFlow_NFT.CollectionStoragePath
+            )
         }
 
         // Get the storefront reference from the seller
         self.storefront = getAccount(storefrontAddress)
-            .capabilities.borrow<&NFTStorefront.Storefront>(
+            .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
                 NFTStorefront.StorefrontPublicPath
-            )
+            )!
+            .borrow()
             ?? panic("Could not borrow Storefront from provided address")
 
         // Get the listing by ID from the storefront
@@ -43,13 +42,13 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         self.price = self.listing.getDetails().salePrice
 
         // Withdraw mainDapperUtilityCoinVault from Dapper's account
-        self.mainDapperUtilityCoinVault = dapper.storage.borrow<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
+        self.mainDapperUtilityCoinVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
             ?? panic("Cannot borrow DapperUtilityCoin vault from account storage")
         self.balanceBeforeTransfer = self.mainDapperUtilityCoinVault.balance
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.FriendsOfFlow_NFTCollection = buyer.storage.borrow<&FriendsOfFlow_NFT.Collection>(
+        self.FriendsOfFlow_NFTCollection = buyer.borrow<&FriendsOfFlow_NFT.Collection{NonFungibleToken.Receiver}>(
             from: FriendsOfFlow_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }

@@ -1,22 +1,42 @@
-
+import NonFungibleToken from 0x631e88ae7f1d7c20
 import costacos123_NFT from 0x04625c28593d9408
+import MetadataViews from 0x631e88ae7f1d7c20
 
 // This transaction installs the costacos123_NFT collection so an
 // account can receive costacos123_NFT NFTs 
 
 transaction() {
-    prepare(signer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account) {
+    prepare(signer: AuthAccount) {
 
         // If the account doesn't already have a collection
-        if signer.storage.borrow<&costacos123_NFT.Collection>(from: costacos123_NFT.CollectionStoragePath) == nil {
+        if signer.borrow<&costacos123_NFT.Collection>(from: costacos123_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            signer.storage.save(<-costacos123_NFT.createEmptyCollection(nftType: Type<@costacos123_NFT.NFT>()), to: costacos123_NFT.CollectionStoragePath)
+            signer.save(<-costacos123_NFT.createEmptyCollection(), to: costacos123_NFT.CollectionStoragePath)
 
-            // create a public capability for the collection
-            signer.capabilities.unpublish(costacos123_NFT.CollectionPublicPath)
-            let collectionCap = signer.capabilities.storage.issue<&costacos123_NFT.Collection>(costacos123_NFT.CollectionStoragePath)
-            signer.capabilities.publish(collectionCap, at: costacos123_NFT.CollectionPublicPath)
+            // Create a public capability to the costacos123_NFT collection
+            // that exposes the Collection interface, which now includes
+            // the Metadata Resolver to expose Metadata Standard views
+            signer.link<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
+                costacos123_NFT.CollectionPublicPath,
+                target: costacos123_NFT.CollectionStoragePath
+            )
+        }
+        // If the account already has a costacos123_NFT collection, but has not yet exposed the 
+        // Metadata Resolver interface for the Metadata Standard views
+        else if (signer.getCapability<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(costacos123_NFT.CollectionPublicPath).borrow() == nil) {
+
+            // Unlink the current capability exposing the costacos123_NFT collection,
+            // as it needs to be replaced with an updated capability
+            signer.unlink(costacos123_NFT.CollectionPublicPath)
+
+            // Create the new public capability to the costacos123_NFT collection
+            // that exposes the Collection interface, which now includes
+            // the Metadata Resolver to expose Metadata Standard views
+            signer.link<&costacos123_NFT.Collection{costacos123_NFT.costacos123_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
+                costacos123_NFT.CollectionPublicPath,
+                target: costacos123_NFT.CollectionStoragePath
+            )
         }
     }
 }
