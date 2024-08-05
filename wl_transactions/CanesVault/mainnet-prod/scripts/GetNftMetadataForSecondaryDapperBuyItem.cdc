@@ -5,12 +5,12 @@
 import Canes_Vault_NFT from 0x329feb3ab062d289
 import NFTStorefront from 0x4eb8a10cb9f87357
 
-pub struct PurchaseData {
-    pub let id: UInt64
-    pub let name: String?
-    pub let amount: UFix64
-    pub let description: String?
-    pub let imageURL: String?
+access(all) struct PurchaseData {
+    access(all) let id: UInt64
+    access(all) let name: String?
+    access(all) let amount: UFix64
+    access(all) let description: String?
+    access(all) let imageURL: String?
 
     init(id: UInt64, name: String?, amount: UFix64, description: String?, imageURL: String?) {
         self.id = id
@@ -21,15 +21,13 @@ pub struct PurchaseData {
     }
 }
 
-pub fun main(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64): PurchaseData {
+access(all) fun main(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64): PurchaseData {
     let acct = getAccount(storefrontAddress)
 
     // Get the storefront reference from the seller
-    let storefront = acct.getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
-            NFTStorefront.StorefrontPublicPath
-        )!
-        .borrow()
-        ?? panic("Could not borrow Storefront from provided address")
+    let storefront = acct.capabilities.borrow<&NFTStorefront.Storefront>(
+            NFTStorefront.StorefrontPublicPath)
+            ?? panic("Could not borrow Storefront from provided address")
 
     // Get the listing by ID from the storefront
     let listing = storefront.borrowListing(listingResourceID: listingResourceID)
@@ -37,8 +35,7 @@ pub fun main(storefrontAddress: Address, listingResourceID: UInt64, expectedPric
     let listingDetails = listing.getDetails()
 
     // Get the NFT and use it to fetch set metadata
-    let collectionRef = acct.getCapability(Canes_Vault_NFT.CollectionPublicPath)
-        .borrow<&{Canes_Vault_NFT.Canes_Vault_NFTCollectionPublic}>()
+    let collectionRef = acct.capabilities.borrow<&Canes_Vault_NFT.Collection>(Canes_Vault_NFT.CollectionPublicPath)
         ?? panic("Could not borrow collection from address")
     let nft = collectionRef.borrowCanes_Vault_NFT(id: listingDetails.nftID)
         ?? panic("No item with that ID")

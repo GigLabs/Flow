@@ -1,3 +1,4 @@
+
 import NonFungibleToken from 0x1d7e57aa55817448
 import Bobblz_NFT from 0xd45e2bd9a3d5003b
 
@@ -6,11 +7,11 @@ import Bobblz_NFT from 0xd45e2bd9a3d5003b
 
 transaction(recipient: Address, withdrawID: UInt64) {
     // local variable for storing the transferred token
-    let nft: @NonFungibleToken.NFT
+    let nft: @{NonFungibleToken.NFT}
 
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(BorrowValue) &Account) {
         // borrow a reference to the signer's NFT collection
-        let collectionRef = acct.borrow<&Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath)
+        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &Bobblz_NFT.Collection>(from: Bobblz_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // withdraw the NFT from the owner's collection
@@ -22,7 +23,8 @@ transaction(recipient: Address, withdrawID: UInt64) {
         let recipientAccount = getAccount(recipient)
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipientAccount.getCapability(Bobblz_NFT.CollectionPublicPath)!.borrow<&{Bobblz_NFT.Bobblz_NFTCollectionPublic}>()!
+        let depositRef = recipientAccount.capabilities.borrow<&Bobblz_NFT.Collection>(Bobblz_NFT.CollectionPublicPath)
+            ?? panic("Could not borrow a reference to the recipient's collection")
 
         // Deposit the NFT in the recipient's collection
         depositRef.deposit(token: <-self.nft)

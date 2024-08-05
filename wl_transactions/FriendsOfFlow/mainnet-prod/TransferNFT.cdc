@@ -1,3 +1,4 @@
+
 import NonFungibleToken from 0x1d7e57aa55817448
 import FriendsOfFlow_NFT from 0xcee3d6cc34301ad1
 
@@ -6,11 +7,11 @@ import FriendsOfFlow_NFT from 0xcee3d6cc34301ad1
 
 transaction(recipient: Address, withdrawID: UInt64) {
     // local variable for storing the transferred token
-    let nft: @NonFungibleToken.NFT
+    let nft: @{NonFungibleToken.NFT}
 
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(BorrowValue) &Account) {
         // borrow a reference to the signer's NFT collection
-        let collectionRef = acct.borrow<&FriendsOfFlow_NFT.Collection>(from: FriendsOfFlow_NFT.CollectionStoragePath)
+        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &FriendsOfFlow_NFT.Collection>(from: FriendsOfFlow_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // withdraw the NFT from the owner's collection
@@ -22,7 +23,8 @@ transaction(recipient: Address, withdrawID: UInt64) {
         let recipientAccount = getAccount(recipient)
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipientAccount.getCapability(FriendsOfFlow_NFT.CollectionPublicPath)!.borrow<&{FriendsOfFlow_NFT.FriendsOfFlow_NFTCollectionPublic}>()!
+        let depositRef = recipientAccount.capabilities.borrow<&FriendsOfFlow_NFT.Collection>(FriendsOfFlow_NFT.CollectionPublicPath)
+            ?? panic("Could not borrow a reference to the recipient's collection")
 
         // Deposit the NFT in the recipient's collection
         depositRef.deposit(token: <-self.nft)

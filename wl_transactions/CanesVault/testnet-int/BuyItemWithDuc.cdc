@@ -1,3 +1,4 @@
+
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import Canes_Vault_Int_NFT from 0x04625c28593d9408
@@ -5,35 +6,35 @@ import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
-    let paymentVault: @FungibleToken.Vault
-    let Canes_Vault_Int_NFTCollection: &Canes_Vault_Int_NFT.Collection{NonFungibleToken.Receiver}
-    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
-    let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
+    let paymentVault: @{FungibleToken.Vault}
+    let Canes_Vault_Int_NFTCollection: &Canes_Vault_Int_NFT.Collection
+    let storefront: &NFTStorefront.Storefront
+    let listing: &{NFTStorefront.ListingPublic}
     let price: UFix64
     let balanceBeforeTransfer: UFix64
-    let mainDapperUtilityCoinVault: &DapperUtilityCoin.Vault
+    let mainDapperUtilityCoinVault: auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault
 
-    prepare(dapper: AuthAccount, buyer: AuthAccount) {
+    prepare(
+        dapper: auth(BorrowValue) &Account,
+        buyer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account
+    ) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&Canes_Vault_Int_NFT.Collection>(from: Canes_Vault_Int_NFT.CollectionStoragePath) == nil {
+        if buyer.storage.borrow<&Canes_Vault_Int_NFT.Collection>(from: Canes_Vault_Int_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-Canes_Vault_Int_NFT.createEmptyCollection(), to: Canes_Vault_Int_NFT.CollectionStoragePath)
+            buyer.storage.save(<-Canes_Vault_Int_NFT.createEmptyCollection(nftType: Type<@Canes_Vault_Int_NFT.NFT>()), to: Canes_Vault_Int_NFT.CollectionStoragePath)
 
-            // Create a public capability to the Canes_Vault_Int_NFT collection
-            // that exposes the Collection interface
-            buyer.link<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.CollectionPublic,Canes_Vault_Int_NFT.Canes_Vault_Int_NFTCollectionPublic}>(
-                Canes_Vault_Int_NFT.CollectionPublicPath,
-                target: Canes_Vault_Int_NFT.CollectionStoragePath
-            )
+            // create a public capability for the collection
+            buyer.capabilities.unpublish(Canes_Vault_Int_NFT.CollectionPublicPath)
+            let collectionCap = buyer.capabilities.storage.issue<&Canes_Vault_Int_NFT.Collection>(Canes_Vault_Int_NFT.CollectionStoragePath)
+            buyer.capabilities.publish(collectionCap, at: Canes_Vault_Int_NFT.CollectionPublicPath)
         }
 
         // Get the storefront reference from the seller
         self.storefront = getAccount(storefrontAddress)
-            .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
+            .capabilities.borrow<&NFTStorefront.Storefront>(
                 NFTStorefront.StorefrontPublicPath
-            )!
-            .borrow()
+            )
             ?? panic("Could not borrow Storefront from provided address")
 
         // Get the listing by ID from the storefront
@@ -42,13 +43,13 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         self.price = self.listing.getDetails().salePrice
 
         // Withdraw mainDapperUtilityCoinVault from Dapper's account
-        self.mainDapperUtilityCoinVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
+        self.mainDapperUtilityCoinVault = dapper.storage.borrow<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
             ?? panic("Cannot borrow DapperUtilityCoin vault from account storage")
         self.balanceBeforeTransfer = self.mainDapperUtilityCoinVault.balance
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.Canes_Vault_Int_NFTCollection = buyer.borrow<&Canes_Vault_Int_NFT.Collection{NonFungibleToken.Receiver}>(
+        self.Canes_Vault_Int_NFTCollection = buyer.storage.borrow<&Canes_Vault_Int_NFT.Collection>(
             from: Canes_Vault_Int_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }

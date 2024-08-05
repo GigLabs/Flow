@@ -2,10 +2,10 @@ import NFTStorefront from 0x94b06cfca1d8a476
 
 // ToddDapper_NFT
 transaction(listingResourceID: UInt64) {
-    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontManager}
+    let storefront: auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront
 
-    prepare(acct: AuthAccount) {
-        self.storefront = acct.borrow<&NFTStorefront.Storefront{NFTStorefront.StorefrontManager}>(from: NFTStorefront.StorefrontStoragePath)
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.storefront = acct.storage.borrow<auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront.Storefront")
     }
 

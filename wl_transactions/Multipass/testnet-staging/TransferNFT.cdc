@@ -1,3 +1,4 @@
+
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import Multipass_NFT from 0xedd8d5484a85a86c
 
@@ -6,11 +7,11 @@ import Multipass_NFT from 0xedd8d5484a85a86c
 
 transaction(recipient: Address, withdrawID: UInt64) {
     // local variable for storing the transferred token
-    let nft: @NonFungibleToken.NFT
+    let nft: @{NonFungibleToken.NFT}
 
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(BorrowValue) &Account) {
         // borrow a reference to the signer's NFT collection
-        let collectionRef = acct.borrow<&Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath)
+        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // withdraw the NFT from the owner's collection
@@ -22,7 +23,8 @@ transaction(recipient: Address, withdrawID: UInt64) {
         let recipientAccount = getAccount(recipient)
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipientAccount.getCapability(Multipass_NFT.CollectionPublicPath)!.borrow<&{Multipass_NFT.Multipass_NFTCollectionPublic}>()!
+        let depositRef = recipientAccount.capabilities.borrow<&Multipass_NFT.Collection>(Multipass_NFT.CollectionPublicPath)
+            ?? panic("Could not borrow a reference to the recipient's collection")
 
         // Deposit the NFT in the recipient's collection
         depositRef.deposit(token: <-self.nft)

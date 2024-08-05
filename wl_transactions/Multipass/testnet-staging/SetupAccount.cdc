@@ -1,42 +1,22 @@
-import NonFungibleToken from 0x631e88ae7f1d7c20
+
 import Multipass_NFT from 0xedd8d5484a85a86c
-import MetadataViews from 0x631e88ae7f1d7c20
 
 // This transaction installs the Multipass_NFT collection so an
 // account can receive Multipass_NFT NFTs 
 
 transaction() {
-    prepare(signer: AuthAccount) {
+    prepare(signer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account) {
 
         // If the account doesn't already have a collection
-        if signer.borrow<&Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath) == nil {
+        if signer.storage.borrow<&Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            signer.save(<-Multipass_NFT.createEmptyCollection(), to: Multipass_NFT.CollectionStoragePath)
+            signer.storage.save(<-Multipass_NFT.createEmptyCollection(nftType: Type<@Multipass_NFT.NFT>()), to: Multipass_NFT.CollectionStoragePath)
 
-            // Create a public capability to the Multipass_NFT collection
-            // that exposes the Collection interface, which now includes
-            // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&Multipass_NFT.Collection{Multipass_NFT.Multipass_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-                Multipass_NFT.CollectionPublicPath,
-                target: Multipass_NFT.CollectionStoragePath
-            )
-        }
-        // If the account already has a Multipass_NFT collection, but has not yet exposed the 
-        // Metadata Resolver interface for the Metadata Standard views
-        else if (signer.getCapability<&Multipass_NFT.Collection{Multipass_NFT.Multipass_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(Multipass_NFT.CollectionPublicPath).borrow() == nil) {
-
-            // Unlink the current capability exposing the Multipass_NFT collection,
-            // as it needs to be replaced with an updated capability
-            signer.unlink(Multipass_NFT.CollectionPublicPath)
-
-            // Create the new public capability to the Multipass_NFT collection
-            // that exposes the Collection interface, which now includes
-            // the Metadata Resolver to expose Metadata Standard views
-            signer.link<&Multipass_NFT.Collection{Multipass_NFT.Multipass_NFTCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(
-                Multipass_NFT.CollectionPublicPath,
-                target: Multipass_NFT.CollectionStoragePath
-            )
+            // create a public capability for the collection
+            signer.capabilities.unpublish(Multipass_NFT.CollectionPublicPath)
+            let collectionCap = signer.capabilities.storage.issue<&Multipass_NFT.Collection>(Multipass_NFT.CollectionStoragePath)
+            signer.capabilities.publish(collectionCap, at: Multipass_NFT.CollectionPublicPath)
         }
     }
 }

@@ -1,3 +1,4 @@
+
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import Multipass_NFT from 0xedd8d5484a85a86c
 
@@ -13,14 +14,14 @@ import Multipass_NFT from 0xedd8d5484a85a86c
 // token ownership can be correctly updated in Dapper wallet database.
 
 transaction() {
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(BorrowValue) &Account) {
 
         // borrow a reference to the owner's NFT collection
-        let collectionRef = acct.borrow<&Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath)
+        let collectionRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &Multipass_NFT.Collection>(from: Multipass_NFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // get all owned token ids from the owner's collection
-        let ids = collectionRef!.getIDs()
+        let ids = collectionRef.getIDs()
 
         // withdraw the list of NFTs from the owner's collection
         let ownerNfts <- collectionRef.batchWithdraw(ids: ids)

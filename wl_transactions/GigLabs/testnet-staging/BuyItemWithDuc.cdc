@@ -1,3 +1,4 @@
+
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import giglabs_NFT from 0xf3e8f8ae2e9e2fec
@@ -5,35 +6,35 @@ import DapperUtilityCoin from 0x82ec283f88a62e65
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
-    let paymentVault: @FungibleToken.Vault
-    let giglabs_NFTCollection: &giglabs_NFT.Collection{NonFungibleToken.Receiver}
-    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
-    let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
+    let paymentVault: @{FungibleToken.Vault}
+    let giglabs_NFTCollection: &giglabs_NFT.Collection
+    let storefront: &NFTStorefront.Storefront
+    let listing: &{NFTStorefront.ListingPublic}
     let price: UFix64
     let balanceBeforeTransfer: UFix64
-    let mainDapperUtilityCoinVault: &DapperUtilityCoin.Vault
+    let mainDapperUtilityCoinVault: auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault
 
-    prepare(dapper: AuthAccount, buyer: AuthAccount) {
+    prepare(
+        dapper: auth(BorrowValue) &Account,
+        buyer: auth(BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue, UnpublishCapability) &Account
+    ) {
         // Initialize the buyer's collection if they do not already have one
-        if buyer.borrow<&giglabs_NFT.Collection>(from: giglabs_NFT.CollectionStoragePath) == nil {
+        if buyer.storage.borrow<&giglabs_NFT.Collection>(from: giglabs_NFT.CollectionStoragePath) == nil {
 
             // Create a new empty collection and save it to the account
-            buyer.save(<-giglabs_NFT.createEmptyCollection(), to: giglabs_NFT.CollectionStoragePath)
+            buyer.storage.save(<-giglabs_NFT.createEmptyCollection(nftType: Type<@giglabs_NFT.NFT>()), to: giglabs_NFT.CollectionStoragePath)
 
-            // Create a public capability to the giglabs_NFT collection
-            // that exposes the Collection interface
-            buyer.link<&giglabs_NFT.Collection{NonFungibleToken.CollectionPublic,giglabs_NFT.giglabs_NFTCollectionPublic}>(
-                giglabs_NFT.CollectionPublicPath,
-                target: giglabs_NFT.CollectionStoragePath
-            )
+            // create a public capability for the collection
+            buyer.capabilities.unpublish(giglabs_NFT.CollectionPublicPath)
+            let collectionCap = buyer.capabilities.storage.issue<&giglabs_NFT.Collection>(giglabs_NFT.CollectionStoragePath)
+            buyer.capabilities.publish(collectionCap, at: giglabs_NFT.CollectionPublicPath)
         }
 
         // Get the storefront reference from the seller
         self.storefront = getAccount(storefrontAddress)
-            .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
+            .capabilities.borrow<&NFTStorefront.Storefront>(
                 NFTStorefront.StorefrontPublicPath
-            )!
-            .borrow()
+            )
             ?? panic("Could not borrow Storefront from provided address")
 
         // Get the listing by ID from the storefront
@@ -42,13 +43,13 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         self.price = self.listing.getDetails().salePrice
 
         // Withdraw mainDapperUtilityCoinVault from Dapper's account
-        self.mainDapperUtilityCoinVault = dapper.borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
+        self.mainDapperUtilityCoinVault = dapper.storage.borrow<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
             ?? panic("Cannot borrow DapperUtilityCoin vault from account storage")
         self.balanceBeforeTransfer = self.mainDapperUtilityCoinVault.balance
         self.paymentVault <- self.mainDapperUtilityCoinVault.withdraw(amount: self.price)
 
         // Get the collection from the buyer so the NFT can be deposited into it
-        self.giglabs_NFTCollection = buyer.borrow<&giglabs_NFT.Collection{NonFungibleToken.Receiver}>(
+        self.giglabs_NFTCollection = buyer.storage.borrow<&giglabs_NFT.Collection>(
             from: giglabs_NFT.CollectionStoragePath
         ) ?? panic("Cannot borrow NFT collection receiver from account")
     }
