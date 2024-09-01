@@ -28,7 +28,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        self.cimelio_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection}>(cimelio_NFT.CollectionStoragePath)
+        self.cimelio_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &cimelio_NFT.Collection>(cimelio_NFT.CollectionStoragePath)
         assert(self.cimelio_NFTProvider.check(), message: "Missing or mis-typed cimelio_NFT.Collection provider")
 
         self.storefront = acct.storage.borrow<auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)

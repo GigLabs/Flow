@@ -28,7 +28,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        self.GigDapper_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection}>(GigDapper_NFT.CollectionStoragePath)
+        self.GigDapper_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &GigDapper_NFT.Collection>(GigDapper_NFT.CollectionStoragePath)
         assert(self.GigDapper_NFTProvider.check(), message: "Missing or mis-typed GigDapper_NFT.Collection provider")
 
         self.storefront = acct.storage.borrow<auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)

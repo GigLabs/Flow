@@ -28,7 +28,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         self.sellerPaymentReceiver = acct.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
-        self.fuchibola_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection}>(fuchibola_NFT.CollectionStoragePath)
+        self.fuchibola_NFTProvider = acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &fuchibola_NFT.Collection>(fuchibola_NFT.CollectionStoragePath)
         assert(self.fuchibola_NFTProvider.check(), message: "Missing or mis-typed fuchibola_NFT.Collection provider")
 
         self.storefront = acct.storage.borrow<auth(NFTStorefront.RemoveListing, NFTStorefront.CreateListing) &NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
